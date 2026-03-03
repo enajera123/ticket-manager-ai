@@ -148,3 +148,31 @@
   color: var(--foreground) !important;
   font-size: 0.875rem;
 }
+
+/* === Custom Modern Scrollbar === */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted-foreground) transparent;
+}
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 4px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-muted-foreground) 35%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.custom-scroll:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-primary) 45%, transparent);
+}
+.custom-scroll::-webkit-scrollbar-thumb:active {
+  background: var(--color-primary);
+  transform: scaleY(1.05);
+}

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import type { Ticket, TicketStatus, GenerationCost } from "@/model/Ticket";
-import { classifyTicketWithAI } from "@/a/openrouter";
+import { classifyTicketWithAI } from "@/ai/openrouter";
 
 interface TicketState {
     tickets: Ticket[];
@@ -32,7 +32,7 @@ export const useTicketStore = create<TicketState>()(
             generationCosts: [],
             isProcessing: false,
             apiKey: "",
-            model: "google/gemini-2.0-flash-001",
+            model: "",
 
             setApiKey: (key: string) => set({ apiKey: key }),
 

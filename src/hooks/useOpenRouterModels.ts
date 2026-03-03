@@ -1,17 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react"
-
-export interface OpenRouterModel {
-    id: string
-    name: string
-    description: string
-    context_length: number
-    pricing: {
-        prompt: string
-        completion: string
-    }
-}
+import type { OpenRouterModel } from "@/model/openRouter/Model"
+import { useLoaderStore } from "@/store/useLoaderStore"
+import { useOpenRouterModelStore } from "@/store/useOpenRouterModelStore"
+import { useEffect, useCallback, useRef } from "react"
 
 interface UseOpenRouterModelsReturn {
     models: OpenRouterModel[]
@@ -25,83 +17,34 @@ interface UseOpenRouterModelsReturn {
     totalFiltered: number
 }
 
-const PAGE_SIZE = 30
-const CACHE_KEY = "openrouter-models-cache"
-const CACHE_TTL = 1000 * 60 * 60 // 1 hour
-
-function getCachedModels(): OpenRouterModel[] | null {
-    try {
-        const raw = localStorage.getItem(CACHE_KEY)
-        if (!raw) return null
-        const parsed = JSON.parse(raw)
-        if (Date.now() - parsed.timestamp > CACHE_TTL) {
-            localStorage.removeItem(CACHE_KEY)
-            return null
-        }
-        return parsed.data
-    } catch {
-        return null
-    }
-}
-
-function setCachedModels(models: OpenRouterModel[]) {
-    try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ data: models, timestamp: Date.now() }))
-    } catch { /* ignore quota errors */ }
-}
-
 export function useOpenRouterModels(): UseOpenRouterModelsReturn {
-    const [allModels, setAllModels] = useState<OpenRouterModel[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [search, setSearch] = useState("")
-    const [page, setPage] = useState(1)
+    const {
+        openRouterModels,
+        fetchModels,
+        search,
+        page,
+        setPage,
+        setSearch,
+        pageSize,
+    } = useOpenRouterModelStore()
+    const { error, isLoading, setError, setIsLoading } = useLoaderStore()
     const fetchedRef = useRef(false)
 
-    // Fetch all models once
     useEffect(() => {
         if (fetchedRef.current) return
         fetchedRef.current = true
-
-        const cached = getCachedModels()
-        if (cached) {
-            setAllModels(cached)
-            return
-        }
-
         setIsLoading(true)
-        fetch("https://openrouter.ai/api/v1/models")
-            .then((res) => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`)
-                return res.json()
-            })
-            .then((data) => {
-                const models: OpenRouterModel[] = (data.data || []).map((m: any) => ({
-                    id: m.id,
-                    name: m.name,
-                    description: m.description || "",
-                    context_length: m.context_length || 0,
-                    pricing: {
-                        prompt: m.pricing?.prompt || "0",
-                        completion: m.pricing?.completion || "0",
-                    },
-                }))
-                // Sort by name
-                models.sort((a, b) => a.name.localeCompare(b.name))
-                setAllModels(models)
-                setCachedModels(models)
-            })
-            .catch((err) => setError(err.message))
-            .finally(() => setIsLoading(false))
+        fetchModels().catch((err) => {
+            console.error("Error fetching OpenRouter models:", err)
+            setError(err instanceof Error ? err.message : "Unknown error")
+        }).finally(() => setIsLoading(false))
     }, [])
 
-    // Reset page when search changes
     useEffect(() => {
         setPage(1)
     }, [search])
 
-    // Filter models by search term
-    const filtered = allModels.filter((m) => {
+    const filtered = openRouterModels.filter((m) => {
         if (!search.trim()) return true
         const q = search.toLowerCase()
         return (
@@ -110,17 +53,17 @@ export function useOpenRouterModels(): UseOpenRouterModelsReturn {
         )
     })
 
-    const visibleModels = filtered.slice(0, page * PAGE_SIZE)
+    const visibleModels = filtered.slice(0, page * pageSize)
     const hasMore = visibleModels.length < filtered.length
 
     const loadMore = useCallback(() => {
         if (hasMore) {
-            setPage((p) => p + 1)
+            setPage(page + 1)
         }
     }, [hasMore])
 
     return {
-        models: allModels,
+        models: openRouterModels,
         visibleModels,
         isLoading,
         error,
