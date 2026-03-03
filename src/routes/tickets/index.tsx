@@ -1,0 +1,29 @@
+'use client'
+
+import { PageTransition } from "@/components/common/layout/PageTransition"
+import { TicketPromptForm } from "@/components/tickets/TicketPromptForm"
+import { TicketList } from "@/components/tickets/TicketList"
+import { TicketStats } from "@/components/tickets/TicketStats"
+import { TicketSettings } from "@/components/tickets/TicketSettings"
+
+export default function TicketsPage() {
+    return (
+        <PageTransition>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Tickets</h2>
+                        <p className="text-muted-foreground">
+                            Genera y gestiona tickets de manera inteligente con IA
+                        </p>
+                    </div>
+                    <TicketSettings />
+                </div>
+
+                <TicketPromptForm />
+                <TicketStats />
+                <TicketList />
+            </div>
+        </PageTransition>
+    )
+}
