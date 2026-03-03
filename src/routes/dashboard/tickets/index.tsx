@@ -1,10 +1,10 @@
 'use client'
 
 import { PageTransition } from "@/components/common/layout/PageTransition"
-import { TicketPromptForm } from "@/components/tickets/TicketPromptForm"
-import { TicketList } from "@/components/tickets/TicketList"
-import { TicketStats } from "@/components/tickets/TicketStats"
-import { TicketSettings } from "@/components/tickets/TicketSettings"
+import { TicketPromptForm } from "@/components/dashboard/tickets/TicketPromptForm"
+import { TicketList } from "@/components/dashboard/tickets/TicketList"
+import { TicketStats } from "@/components/dashboard/tickets/TicketStats"
+import { TicketSettings } from "@/components/dashboard/tickets/TicketSettings"
 
 export default function TicketsPage() {
     return (

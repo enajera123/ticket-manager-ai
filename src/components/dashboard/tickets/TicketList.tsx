@@ -1,15 +1,17 @@
 'use client'
 
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     Clock, Tag, Trash2, AlertTriangle,
     ArrowUp, ArrowRight, ArrowDown, Bug, Lightbulb, Wrench, HelpCircle, ListTodo,
-    Calendar
+    Calendar, Pencil
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useTicketStore } from "@/store/useTicketStore"
+import { TicketEditDialog } from "@/components/dashboard/tickets/TicketEditDialog"
 import type { Ticket, TicketPriority, TicketStatus, TicketType } from "@/model/Ticket"
 
 const priorityConfig: Record<TicketPriority, { label: string; variant: "critical" | "destructive" | "warning" | "info"; icon: React.ReactNode }> = {
@@ -36,7 +38,7 @@ const statusConfig: Record<TicketStatus, { label: string; variant: "default" | "
 
 const statusOrder: TicketStatus[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]
 
-function TicketCard({ ticket }: { ticket: Ticket }) {
+function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket: Ticket) => void }) {
     const { updateTicketStatus, deleteTicket } = useTicketStore()
 
     const priority = priorityConfig[ticket.priority]
@@ -135,6 +137,14 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
                         <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => onEdit(ticket)}
+                            className="text-xs h-7"
+                        >
+                            <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => deleteTicket(ticket.id)}
                             className="text-xs h-7 text-destructive hover:text-destructive"
                         >
@@ -149,6 +159,13 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
 
 export function TicketList() {
     const { tickets } = useTicketStore()
+    const [editingTicket, setEditingTicket] = useState<Ticket | null>(null)
+    const [editDialogOpen, setEditDialogOpen] = useState(false)
+
+    const handleEdit = (ticket: Ticket) => {
+        setEditingTicket(ticket)
+        setEditDialogOpen(true)
+    }
 
     if (tickets.length === 0) {
         return (
@@ -169,12 +186,19 @@ export function TicketList() {
     }
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <AnimatePresence mode="popLayout">
-                {tickets.map((ticket) => (
-                    <TicketCard key={ticket.id} ticket={ticket} />
-                ))}
-            </AnimatePresence>
-        </div>
+        <>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <AnimatePresence mode="popLayout">
+                    {tickets.map((ticket) => (
+                        <TicketCard key={ticket.id} ticket={ticket} onEdit={handleEdit} />
+                    ))}
+                </AnimatePresence>
+            </div>
+            <TicketEditDialog
+                ticket={editingTicket}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+            />
+        </>
     )
 }

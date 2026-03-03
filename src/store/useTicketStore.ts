@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
-import type { Ticket, TicketStatus } from "@/model/Ticket";
-import { classifyTicketWithAI } from "@/ai/openrouter";
+import type { Ticket, TicketStatus, GenerationCost } from "@/model/Ticket";
+import { classifyTicketWithAI } from "@/a/openrouter";
 
 interface TicketState {
     tickets: Ticket[];
+    generationCosts: GenerationCost[];
     isProcessing: boolean;
     apiKey: string;
     model: string;
@@ -13,8 +14,11 @@ interface TicketState {
     setModel: (model: string) => void;
     createTicketFromPrompt: (prompt: string) => Promise<Ticket | null>;
     updateTicketStatus: (id: string, status: TicketStatus) => void;
+    updateTicket: (id: string, updates: Partial<Omit<Ticket, "id" | "createdAt" | "originalPrompt">>) => void;
     deleteTicket: (id: string) => void;
     getTicketById: (id: string) => Ticket | undefined;
+    getTotalCost: () => number;
+    getCostByModel: () => Record<string, { cost: number; count: number; tokens: number }>;
 }
 
 function generateId(): string {
@@ -25,6 +29,7 @@ export const useTicketStore = create<TicketState>()(
     persist(
         (set, get) => ({
             tickets: [],
+            generationCosts: [],
             isProcessing: false,
             apiKey: "",
             model: "google/gemini-2.0-flash-001",
@@ -51,26 +56,40 @@ export const useTicketStore = create<TicketState>()(
                 set({ isProcessing: true });
 
                 try {
-                    const aiResponse = await classifyTicketWithAI(prompt, apiKey, model);
+                    const result = await classifyTicketWithAI(prompt, apiKey, model);
 
                     const now = new Date().toISOString();
+                    const ticketId = generateId();
+
                     const ticket: Ticket = {
-                        id: generateId(),
-                        title: aiResponse.title,
-                        description: aiResponse.description,
-                        type: aiResponse.type,
-                        priority: aiResponse.priority,
+                        id: ticketId,
+                        title: result.ticket.title,
+                        description: result.ticket.description,
+                        type: result.ticket.type,
+                        priority: result.ticket.priority,
                         status: "OPEN",
-                        deadline: aiResponse.deadline,
-                        estimatedHours: aiResponse.estimatedHours,
-                        tags: aiResponse.tags,
+                        deadline: result.ticket.deadline,
+                        estimatedHours: result.ticket.estimatedHours,
+                        tags: result.ticket.tags,
                         originalPrompt: prompt,
                         createdAt: now,
                         updatedAt: now,
                     };
 
+                    const costRecord: GenerationCost = {
+                        id: `COST-${Date.now().toString(36).toUpperCase()}`,
+                        ticketId,
+                        model: result.cost.model,
+                        usage: result.cost.usage,
+                        promptCostPerMillion: result.cost.promptCostPerMillion,
+                        completionCostPerMillion: result.cost.completionCostPerMillion,
+                        totalCost: result.cost.totalCost,
+                        createdAt: now,
+                    };
+
                     set((state) => ({
                         tickets: [ticket, ...state.tickets],
+                        generationCosts: [costRecord, ...state.generationCosts],
                         isProcessing: false,
                     }));
 
@@ -97,6 +116,15 @@ export const useTicketStore = create<TicketState>()(
                 toast.success("Estado del ticket actualizado");
             },
 
+            updateTicket: (id: string, updates: Partial<Omit<Ticket, "id" | "createdAt" | "originalPrompt">>) => {
+                set((state) => ({
+                    tickets: state.tickets.map((t) =>
+                        t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t
+                    ),
+                }));
+                toast.success("Ticket actualizado");
+            },
+
             deleteTicket: (id: string) => {
                 set((state) => ({
                     tickets: state.tickets.filter((t) => t.id !== id),
@@ -107,11 +135,30 @@ export const useTicketStore = create<TicketState>()(
             getTicketById: (id: string) => {
                 return get().tickets.find((t) => t.id === id);
             },
+
+            getTotalCost: () => {
+                return get().generationCosts.reduce((sum, c) => sum + c.totalCost, 0);
+            },
+
+            getCostByModel: () => {
+                const costs = get().generationCosts;
+                const map: Record<string, { cost: number; count: number; tokens: number }> = {};
+                for (const c of costs) {
+                    if (!map[c.model]) {
+                        map[c.model] = { cost: 0, count: 0, tokens: 0 };
+                    }
+                    map[c.model].cost += c.totalCost;
+                    map[c.model].count += 1;
+                    map[c.model].tokens += c.usage.totalTokens;
+                }
+                return map;
+            },
         }),
         {
             name: "ticket-store",
             partialize: (state) => ({
                 tickets: state.tickets,
+                generationCosts: state.generationCosts,
                 apiKey: state.apiKey,
                 model: state.model,
             }),

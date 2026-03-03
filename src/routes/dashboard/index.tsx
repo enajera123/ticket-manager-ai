@@ -1,100 +1,191 @@
 'use client'
 import { PageTransition } from "@/components/common/layout/PageTransition"
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Suspense } from "react"
+import { useTicketStore } from "@/store/useTicketStore"
+import {
+    TicketCheck, Bug, Lightbulb, Wrench, ListTodo, HelpCircle,
+    CheckCircle, Clock, AlertTriangle, ArrowUpCircle, TrendingDown
+} from "lucide-react"
+import type { TicketType, TicketStatus } from "@/model/Ticket"
+import { BillingByModel, BillingStats, RecentGenerations } from "@/components/dashboard/tickets/BillingStats"
+
+const typeIcons: Record<TicketType, React.ReactNode> = {
+    BUG: <Bug className="h-3.5 w-3.5 text-red-500" />,
+    FEATURE: <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />,
+    IMPROVEMENT: <Wrench className="h-3.5 w-3.5 text-blue-500" />,
+    TASK: <ListTodo className="h-3.5 w-3.5 text-green-500" />,
+    SUPPORT: <HelpCircle className="h-3.5 w-3.5 text-purple-500" />,
+}
+
+const statusLabels: Record<TicketStatus, string> = {
+    OPEN: "Abierto",
+    IN_PROGRESS: "En Progreso",
+    RESOLVED: "Resuelto",
+    CLOSED: "Cerrado",
+}
+
+const statusVariant: Record<TicketStatus, "default" | "info" | "success" | "secondary"> = {
+    OPEN: "default",
+    IN_PROGRESS: "info",
+    RESOLVED: "success",
+    CLOSED: "secondary",
+}
+
 export default function DashboardPage() {
+    const { tickets } = useTicketStore()
+
+    const total = tickets.length
+    const open = tickets.filter((t) => t.status === "OPEN").length
+    const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length
+    const resolved = tickets.filter((t) => t.status === "RESOLVED" || t.status === "CLOSED").length
+    const overdue = tickets.filter((t) => {
+        const deadlineDate = new Date(t.deadline + "T00:00:00")
+        return deadlineDate < new Date() && t.status !== "CLOSED" && t.status !== "RESOLVED"
+    }).length
+
+    // Type distribution
+    const byType = tickets.reduce<Record<string, number>>((acc, t) => {
+        acc[t.type] = (acc[t.type] || 0) + 1
+        return acc
+    }, {})
+
+    // Recent tickets
+    const recentTickets = tickets.slice(0, 5)
+
+    // Resolution rate
+    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0
+
+    const summaryCards = [
+        { title: "Total Tickets", value: total, icon: <TicketCheck className="h-4 w-4 text-muted-foreground" /> },
+        { title: "Abiertos", value: open, icon: <AlertTriangle className="h-4 w-4 text-yellow-500" /> },
+        { title: "En Progreso", value: inProgress, icon: <Clock className="h-4 w-4 text-blue-500" /> },
+        { title: "Resueltos", value: resolved, icon: <CheckCircle className="h-4 w-4 text-green-500" /> },
+        { title: "Vencidos", value: overdue, icon: <TrendingDown className="h-4 w-4 text-red-500" /> },
+        { title: "Tasa Resolución", value: `${resolutionRate}%`, icon: <ArrowUpCircle className="h-4 w-4 text-emerald-500" /> },
+    ]
+
     return (
         <PageTransition>
             <div className="space-y-6">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Title</h2>
-                    <p className="text-muted-foreground">Subtitle</p>
+                    <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+                    <p className="text-muted-foreground">
+                        Resumen de tickets y costos de generación con IA
+                    </p>
                 </div>
+
                 <Suspense fallback={<DashboardSkeleton />}>
-                    <div className="grid gap-6 lg:grid-cols-3">
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">Card 1</CardTitle>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            className="h-4 w-4 text-muted-foreground"
-                                        >
-                                            <rect width="20" height="14" x="2" y="5" rx="2" />
-                                            <path d="M2 10h20" />
-                                        </svg>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">{20}</div>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">Card 2</CardTitle>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            className="h-4 w-4 text-muted-foreground"
-                                        >
-                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                                        </svg>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">{10}</div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card 4</CardTitle>
-                                    <CardDescription>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum itaque labore perspiciatis mollitia. Pariatur reprehenderit, cum molestias voluptatum tempore excepturi, earum, nostrum ipsam quos voluptatibus commodi atque sunt quidem voluptate!</CardDescription>
-                                </CardHeader>
-                                <CardContent className="pl-2">
-                                </CardContent>
-                            </Card>
-                            <div className="lg:hidden">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Card 3</CardTitle>
-                                        <CardDescription>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum itaque labore perspiciatis mollitia. Pariatur reprehenderit, cum molestias voluptatum tempore excepturi, earum, nostrum ipsam quos voluptatib</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </div>
-                        <div className="space-y-6">
-                            <div className="hidden lg:block">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Card 4</CardTitle>
-                                        <CardDescription>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum itaque labore perspiciatis mollitia. Pariatur reprehenderit, cum molestias voluptatum tempore excepturi, earum, nostrum ipsam quos voluptatibus commodi atque sunt quidem voluptate!</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card 5</CardTitle>
-                                    <CardDescription>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum itaque labore perspiciatis mollitia. Pariatur reprehenderit, cum molestias voluptatum tempore excepturi, earum, nostrum ipsam quos voluptatibus commodi atque sunt quidem voluptate!</CardDescription>
+                    {/* Ticket Summary Cards */}
+                    <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+                        {summaryCards.map((stat) => (
+                            <Card key={stat.title}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-xs font-medium">{stat.title}</CardTitle>
+                                    {stat.icon}
                                 </CardHeader>
                                 <CardContent>
+                                    <div className="text-2xl font-bold">{stat.value}</div>
                                 </CardContent>
                             </Card>
+                        ))}
+                    </div>
+
+                    {/* Billing Summary */}
+                    <BillingStats />
+
+                    <div className="grid gap-6 lg:grid-cols-3">
+                        <div className="lg:col-span-2 space-y-6">
+                            {/* Type Distribution */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-sm">Distribución por Tipo</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {Object.keys(byType).length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">
+                                            No hay tickets aún.
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {Object.entries(byType)
+                                                .sort((a, b) => b[1] - a[1])
+                                                .map(([type, count]) => (
+                                                    <div key={type} className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-2 w-28">
+                                                            {typeIcons[type as TicketType]}
+                                                            <span className="text-sm font-medium">{type}</span>
+                                                        </div>
+                                                        <div className="flex-1 h-3 rounded-full bg-muted overflow-hidden">
+                                                            <div
+                                                                className="h-full rounded-full bg-primary transition-all"
+                                                                style={{
+                                                                    width: `${(count / total) * 100}%`,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="text-sm text-muted-foreground w-12 text-right">
+                                                            {count} ({Math.round((count / total) * 100)}%)
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Cost by Model */}
+                            <BillingByModel />
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* Recent Tickets */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-sm">Tickets Recientes</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {recentTickets.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">
+                                            No hay tickets aún.
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {recentTickets.map((ticket) => (
+                                                <div
+                                                    key={ticket.id}
+                                                    className="flex items-start gap-3 py-2 border-b last:border-0"
+                                                >
+                                                    <span className="mt-0.5">
+                                                        {typeIcons[ticket.type]}
+                                                    </span>
+                                                    <div className="flex-1 min-w-0 space-y-1">
+                                                        <p className="text-sm font-medium truncate">
+                                                            {ticket.title}
+                                                        </p>
+                                                        <div className="flex items-center gap-2">
+                                                            <Badge
+                                                                variant={statusVariant[ticket.status]}
+                                                                className="text-[9px] h-4"
+                                                            >
+                                                                {statusLabels[ticket.status]}
+                                                            </Badge>
+                                                            <span className="text-[10px] text-muted-foreground font-mono">
+                                                                {ticket.id}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Recent Generations */}
+                            <RecentGenerations />
                         </div>
                     </div>
                 </Suspense>
