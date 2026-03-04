@@ -1,5 +1,5 @@
 
-export async function fetchData<T>(url: string, method?: string, authToken?: string, body?: any): Promise<{ data: T } | null> {
+export async function fetchData<T>(url: string, method?: string, authToken?: string, body?: any): Promise<T> {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
@@ -16,5 +16,5 @@ export async function fetchData<T>(url: string, method?: string, authToken?: str
         window.location.href = "/";
         return Promise.reject(new Error("Unauthorized access - please log in again."));
     }
-    return await response.json() as { data: T };
+    return await response.json() as T;
 }

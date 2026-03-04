@@ -10,7 +10,7 @@ import {
     CheckCircle, Clock, AlertTriangle, ArrowUpCircle, TrendingDown
 } from "lucide-react"
 import type { TicketType, TicketStatus } from "@/model/Ticket"
-import { BillingByModel, BillingStats, RecentGenerations } from "@/components/dashboard/tickets/BillingStats"
+import { BillingByModel, BillingStats, RecentGenerations } from "@/components/dashboard/BillingStats"
 
 const typeIcons: Record<TicketType, React.ReactNode> = {
     BUG: <Bug className="h-3.5 w-3.5 text-red-500" />,

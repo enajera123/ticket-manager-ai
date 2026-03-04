@@ -8,20 +8,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTicketStore } from "@/store/useTicketStore"
 
-const placeholders = [
-    "Ej: El botón de login no funciona cuando el usuario escribe un email con mayúsculas...",
-    "Ej: Necesitamos agregar un módulo de reportes con gráficos de barras...",
-    "Ej: Mejorar el rendimiento de la página de dashboard, carga muy lento...",
-    "Ej: Agregar validación de campos en el formulario de registro...",
-    "Ej: El sistema no envía correos de confirmación después del registro...",
-]
 
 export function TicketPromptForm() {
     const { createTicketFromPrompt, isProcessing } = useTicketStore()
     const [prompt, setPrompt] = useState("")
-    const [placeholder] = useState(
-        () => placeholders[Math.floor(Math.random() * placeholders.length)]
-    )
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -63,9 +53,9 @@ export function TicketPromptForm() {
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder={placeholder}
+                                placeholder={"Ej: El sistema no envía correos de confirmación después del registro..."}
                                 disabled={isProcessing}
-                                className="min-h-[120px] pr-4 text-sm"
+                                className="min-h-30 pr-4 text-sm"
                                 maxLength={2000}
                             />
                             <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
@@ -89,7 +79,7 @@ export function TicketPromptForm() {
                                     </>
                                 ) : (
                                     <>
-                                        <Send className="h-4 w-4" />
+                                        <Send  className="h-4 w-4 " />
                                         Generar Ticket
                                     </>
                                 )}

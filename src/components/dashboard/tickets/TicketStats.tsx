@@ -1,5 +1,3 @@
-'use client'
-
 import { useTicketStore } from "@/store/useTicketStore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bug, Lightbulb, ListTodo, AlertTriangle, CheckCircle } from "lucide-react"
@@ -18,12 +16,12 @@ export function TicketStats() {
     }
 
     const statCards = [
-        { title: "Total", value: stats.total, icon: <ListTodo className="h-4 w-4 text-muted-foreground" /> },
-        { title: "Abiertos", value: stats.open, icon: <AlertTriangle className="h-4 w-4 text-yellow-500" /> },
-        { title: "En Progreso", value: stats.inProgress, icon: <Lightbulb className="h-4 w-4 text-blue-500" /> },
-        { title: "Resueltos", value: stats.resolved, icon: <CheckCircle className="h-4 w-4 text-green-500" /> },
-        { title: "Bugs", value: stats.bugs, icon: <Bug className="h-4 w-4 text-red-500" /> },
-        { title: "Alta Prioridad", value: stats.critical, icon: <AlertTriangle className="h-4 w-4 text-red-500" /> },
+        { title: "Total", value: stats.total, icon: <ListTodo className="h-4 w-4" />, borderClass: "border border-2 border-gray-200" },
+        { title: "Abiertos", value: stats.open, icon: <AlertTriangle className="h-4 w-4" />, borderClass: "border border-2 border-yellow-300" },
+        { title: "En Progreso", value: stats.inProgress, icon: <Lightbulb className="h-4 w-4" />, borderClass: "border border-2 border-blue-300" },
+        { title: "Resueltos", value: stats.resolved, icon: <CheckCircle className="h-4 w-4" />, borderClass: "border border-2 border-green-300" },
+        { title: "Bugs", value: stats.bugs, icon: <Bug className="h-4 w-4" />, borderClass: "border border-2 border-red-300" },
+        { title: "Alta Prioridad", value: stats.critical, icon: <AlertTriangle className="h-4 w-4" />, borderClass: "border border-2 border-red-500" },
     ]
 
     if (tickets.length === 0) return null
@@ -31,7 +29,7 @@ export function TicketStats() {
     return (
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             {statCards.map((stat) => (
-                <Card key={stat.title}>
+                <Card key={stat.title} className={stat.borderClass}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-xs font-medium">{stat.title}</CardTitle>
                         {stat.icon}

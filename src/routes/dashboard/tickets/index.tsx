@@ -19,7 +19,6 @@ export default function TicketsPage() {
                     </div>
                     <TicketSettings />
                 </div>
-
                 <TicketPromptForm />
                 <TicketStats />
                 <TicketList />

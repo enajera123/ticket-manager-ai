@@ -30,11 +30,11 @@ export const useOpenRouterModelStore = create<OpenRouterModelState>()(
             search: "",
             fetchModels: async () => {
                 try {
-                    const response = await fetchData("https://openrouter.ai/api/v1/models", "GET");
+                    const response = await fetchData("https://openrouter.ai/api/v1/models", "GET") as { data: OpenRouterModel[] };
                     if (!response) {
                         throw new Error("No se pudo obtener la lista de modelos. Por favor, intenta de nuevo más tarde.");
                     }
-                    const models = response.data as OpenRouterModel[]
+                    const models = response.data
                     models.sort((a, b) => a.name.localeCompare(b.name));
                     set({ openRouterModels: models });
                 } catch (err) {
