@@ -7,3 +7,7 @@ export function generatePassword(length: number = 6): string {
     }
     return password;
 }
+
+export function generateId(prefix: string): string {
+    return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+}

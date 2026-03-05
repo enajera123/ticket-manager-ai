@@ -4,7 +4,6 @@ import { PageTransition } from "@/components/common/layout/PageTransition"
 import { TicketPromptForm } from "@/components/dashboard/tickets/TicketPromptForm"
 import { TicketList } from "@/components/dashboard/tickets/TicketList"
 import { TicketStats } from "@/components/dashboard/tickets/TicketStats"
-import { TicketSettings } from "@/components/dashboard/tickets/TicketSettings"
 
 export default function TicketsPage() {
     return (
@@ -17,7 +16,6 @@ export default function TicketsPage() {
                             Genera y gestiona tickets de manera inteligente con IA
                         </p>
                     </div>
-                    <TicketSettings />
                 </div>
                 <TicketPromptForm />
                 <TicketStats />

@@ -1,9 +1,13 @@
 import { useTicketStore } from "@/store/useTicketStore"
+import { useProjectStore } from "@/store/useProjectStore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bug, Lightbulb, ListTodo, AlertTriangle, CheckCircle } from "lucide-react"
 
 export function TicketStats() {
-    const { tickets } = useTicketStore()
+    const { getTicketsByProject } = useTicketStore()
+    const { getCurrentProject } = useProjectStore()
+    const currentProject = getCurrentProject()
+    const tickets = currentProject ? getTicketsByProject(currentProject.id) : []
 
     const stats = {
         total: tickets.length,
@@ -29,12 +33,12 @@ export function TicketStats() {
     return (
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             {statCards.map((stat) => (
-                <Card key={stat.title} className={stat.borderClass}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card key={stat.title} className={`py-4 gap-0 ${stat.borderClass}`}>
+                    <CardHeader className="flex flex-row items-center justify-between my-0">
                         <CardTitle className="text-xs font-medium">{stat.title}</CardTitle>
                         {stat.icon}
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="my-0 py-0">
                         <div className="text-2xl font-bold">{stat.value}</div>
                     </CardContent>
                 </Card>

@@ -16,7 +16,6 @@ export default function DashboardLayout({
     return (
         <div className="flex min-h-screen flex-col bg-background">
             <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-
             <div className="flex flex-1">
                 <SideBar collapsed={collapsed} />
                 <main
@@ -26,7 +25,6 @@ export default function DashboardLayout({
                     {children}
                 </main>
             </div>
-
             <BottomNav />
         </div>
     )

@@ -6,37 +6,17 @@ import { Badge } from "@/components/ui/badge"
 import { Suspense } from "react"
 import { useTicketStore } from "@/store/useTicketStore"
 import {
-    TicketCheck, Bug, Lightbulb, Wrench, ListTodo, HelpCircle,
-    CheckCircle, Clock, AlertTriangle, ArrowUpCircle, TrendingDown
+    TicketCheck, CheckCircle, Clock, AlertTriangle, ArrowUpCircle, TrendingDown
 } from "lucide-react"
-import type { TicketType, TicketStatus } from "@/model/Ticket"
-import { BillingByModel, BillingStats, RecentGenerations } from "@/components/dashboard/BillingStats"
-
-const typeIcons: Record<TicketType, React.ReactNode> = {
-    BUG: <Bug className="h-3.5 w-3.5 text-red-500" />,
-    FEATURE: <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />,
-    IMPROVEMENT: <Wrench className="h-3.5 w-3.5 text-blue-500" />,
-    TASK: <ListTodo className="h-3.5 w-3.5 text-green-500" />,
-    SUPPORT: <HelpCircle className="h-3.5 w-3.5 text-purple-500" />,
-}
-
-const statusLabels: Record<TicketStatus, string> = {
-    OPEN: "Abierto",
-    IN_PROGRESS: "En Progreso",
-    RESOLVED: "Resuelto",
-    CLOSED: "Cerrado",
-}
-
-const statusVariant: Record<TicketStatus, "default" | "info" | "success" | "secondary"> = {
-    OPEN: "default",
-    IN_PROGRESS: "info",
-    RESOLVED: "success",
-    CLOSED: "secondary",
-}
+import type { TicketType } from "@/model/Ticket"
+import { BillingStats } from "@/components/dashboard/panel/BillingStats"
+import BillingByModel from "@/components/dashboard/panel/BillingByModel"
+import { RecentGenerations } from "@/components/dashboard/panel/RecentGenerations"
+import { useMappers } from "@/hooks/useMappers"
 
 export default function DashboardPage() {
     const { tickets } = useTicketStore()
-
+    const { typeConfig, statusConfig } = useMappers()
     const total = tickets.length
     const open = tickets.filter((t) => t.status === "OPEN").length
     const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length
@@ -76,9 +56,7 @@ export default function DashboardPage() {
                         Resumen de tickets y costos de generación con IA
                     </p>
                 </div>
-
                 <Suspense fallback={<DashboardSkeleton />}>
-                    {/* Ticket Summary Cards */}
                     <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
                         {summaryCards.map((stat) => (
                             <Card key={stat.title}>
@@ -92,13 +70,9 @@ export default function DashboardPage() {
                             </Card>
                         ))}
                     </div>
-
-                    {/* Billing Summary */}
                     <BillingStats />
-
                     <div className="grid gap-6 lg:grid-cols-3">
                         <div className="lg:col-span-2 space-y-6">
-                            {/* Type Distribution */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-sm">Distribución por Tipo</CardTitle>
@@ -115,7 +89,7 @@ export default function DashboardPage() {
                                                 .map(([type, count]) => (
                                                     <div key={type} className="flex items-center gap-3">
                                                         <div className="flex items-center gap-2 w-28">
-                                                            {typeIcons[type as TicketType]}
+                                                            {typeConfig[type as TicketType].icon}
                                                             <span className="text-sm font-medium">{type}</span>
                                                         </div>
                                                         <div className="flex-1 h-3 rounded-full bg-muted overflow-hidden">
@@ -135,13 +109,9 @@ export default function DashboardPage() {
                                     )}
                                 </CardContent>
                             </Card>
-
-                            {/* Cost by Model */}
                             <BillingByModel />
                         </div>
-
                         <div className="space-y-6">
-                            {/* Recent Tickets */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-sm">Tickets Recientes</CardTitle>
@@ -159,7 +129,7 @@ export default function DashboardPage() {
                                                     className="flex items-start gap-3 py-2 border-b last:border-0"
                                                 >
                                                     <span className="mt-0.5">
-                                                        {typeIcons[ticket.type]}
+                                                        {typeConfig[ticket.type].label}
                                                     </span>
                                                     <div className="flex-1 min-w-0 space-y-1">
                                                         <p className="text-sm font-medium truncate">
@@ -167,10 +137,10 @@ export default function DashboardPage() {
                                                         </p>
                                                         <div className="flex items-center gap-2">
                                                             <Badge
-                                                                variant={statusVariant[ticket.status]}
+                                                                variant={statusConfig[ticket.status].variant}
                                                                 className="text-[9px] h-4"
                                                             >
-                                                                {statusLabels[ticket.status]}
+                                                                {statusConfig[ticket.status].label}
                                                             </Badge>
                                                             <span className="text-[10px] text-muted-foreground font-mono">
                                                                 {ticket.id}
@@ -183,8 +153,6 @@ export default function DashboardPage() {
                                     )}
                                 </CardContent>
                             </Card>
-
-                            {/* Recent Generations */}
                             <RecentGenerations />
                         </div>
                     </div>

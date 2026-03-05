@@ -7,17 +7,20 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTicketStore } from "@/store/useTicketStore"
+import { useProjectStore } from "@/store/useProjectStore"
 
 
 export function TicketPromptForm() {
     const { createTicketFromPrompt, isProcessing } = useTicketStore()
+    const { getCurrentProject } = useProjectStore()
+    const currentProject = getCurrentProject()
     const [prompt, setPrompt] = useState("")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!prompt.trim() || isProcessing) return
+        if (!prompt.trim() || isProcessing || !currentProject) return
 
-        const ticket = await createTicketFromPrompt(prompt)
+        const ticket = await createTicketFromPrompt(prompt, currentProject.id, currentProject.context)
         if (ticket) {
             setPrompt("")
         }
@@ -43,7 +46,10 @@ export function TicketPromptForm() {
                         Generar Ticket con IA
                     </CardTitle>
                     <CardDescription>
-                        Describe lo que necesitas y la IA clasificará, priorizará y estructurará tu ticket automáticamente.
+                        {currentProject 
+                            ? `Describe lo que necesitas y la IA clasificará, priorizará y estructurará tu ticket automáticamente para ${currentProject.name}.`
+                            : "Selecciona un proyecto para comenzar a generar tickets."
+                        }
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -1,14 +1,16 @@
-'use client'
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { AppDialog } from "@/components/common/AppDialog"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useTicketStore } from "@/store/useTicketStore"
 import type { Ticket, TicketType, TicketPriority, TicketStatus } from "@/model/Ticket"
-import { X } from "lucide-react"
+import { ListTodo, X } from "lucide-react"
+import { Form, useFormik, FormikProvider } from "formik"
+import { ticketInitialValues, TicketSchema } from "@/schemas/TicketSchema"
+import InputField from "@/components/common/InputField"
+import SelectField from "@/components/common/SelectField"
+import { useCrudTickets } from "@/hooks/tickets/useCrudTickets"
+import { useProjectStore } from "@/store/useProjectStore"
 
 const ticketTypes: { value: TicketType; label: string }[] = [
     { value: "BUG", label: "Bug" },
@@ -39,220 +41,157 @@ interface TicketEditDialogProps {
 }
 
 export function TicketEditDialog({ ticket, open, onOpenChange }: TicketEditDialogProps) {
-    const { updateTicket } = useTicketStore()
 
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [type, setType] = useState<TicketType>("TASK")
-    const [priority, setPriority] = useState<TicketPriority>("MEDIUM")
-    const [status, setStatus] = useState<TicketStatus>("OPEN")
-    const [deadline, setDeadline] = useState("")
-    const [estimatedHours, setEstimatedHours] = useState(0)
-    const [tags, setTags] = useState<string[]>([])
+    const { handleSave } = useCrudTickets()
+    const { getCurrentProject } = useProjectStore()
+    const currentProject = getCurrentProject()
     const [tagInput, setTagInput] = useState("")
-
-    useEffect(() => {
-        if (ticket) {
-            setTitle(ticket.title)
-            setDescription(ticket.description)
-            setType(ticket.type)
-            setPriority(ticket.priority)
-            setStatus(ticket.status)
-            setDeadline(ticket.deadline)
-            setEstimatedHours(ticket.estimatedHours)
-            setTags([...ticket.tags])
-            setTagInput("")
-        }
-    }, [ticket])
-
-    const addTag = () => {
-        const trimmed = tagInput.trim()
-        if (trimmed && !tags.includes(trimmed)) {
-            setTags([...tags, trimmed])
-            setTagInput("")
-        }
-    }
-
-    const removeTag = (tag: string) => {
-        setTags(tags.filter((t) => t !== tag))
-    }
-
-    const handleSave = () => {
-        if (!ticket) return
-        updateTicket(ticket.id, {
-            title,
-            description,
-            type,
-            priority,
-            status,
-            deadline,
-            estimatedHours,
-            tags,
-        })
-        onOpenChange(false)
-    }
-
-    if (!ticket) return null
+    
+    const initialValues = ticket 
+        ? ticketInitialValues(ticket)
+        : { ...ticketInitialValues(null), projectId: currentProject?.id || "" }
+    
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: initialValues as Ticket,
+        validationSchema: TicketSchema,
+        onSubmit: (values) => handleSave(values),
+    })
+    const { values, setFieldValue } = formik
 
     return (
         <AppDialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Editar Ticket"
-            description={ticket.id}
+            title={ticket?.id ? "Editar ticket" : "Crear ticket"}
+            description={ticket?.id ?? ""}
             showFooter={true}
             onCancel={() => onOpenChange(false)}
-            onConfirm={handleSave}
+            onConfirm={() => {
+                console.log(formik.errors)
+                console.log(formik.values)
+                formik.submitForm()
+            }}
             cancelText="Cancelar"
             confirmText="Guardar cambios"
             loading={false}
             maxWidth="max-w-2xl max-h-[90vh] overflow-y-auto"
         >
-            <div className="space-y-4">
-                {/* Title */}
-                <div className="space-y-2">
-                    <label htmlFor="edit-title" className="text-sm font-medium">Título</label>
-                    <Input
-                        id="edit-title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Título del ticket"
-                    />
-                </div>
-
-                {/* Description */}
-                <div className="space-y-2">
-                    <label htmlFor="edit-description" className="text-sm font-medium">Descripción</label>
-                    <Textarea
-                        id="edit-description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Descripción detallada"
-                        className="min-h-25"
-                    />
-                </div>
-
-                {/* Type & Priority */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label htmlFor="edit-type" className="text-sm font-medium">Tipo</label>
-                        <select
-                            id="edit-type"
-                            value={type}
-                            onChange={(e) => setType(e.target.value as TicketType)}
-                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            {ticketTypes.map((t) => (
-                                <option key={t.value} value={t.value}>
-                                    {t.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <label htmlFor="edit-priority" className="text-sm font-medium">Prioridad</label>
-                        <select
-                            id="edit-priority"
-                            value={priority}
-                            onChange={(e) => setPriority(e.target.value as TicketPriority)}
-                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            {ticketPriorities.map((p) => (
-                                <option key={p.value} value={p.value}>
-                                    {p.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                {/* Status */}
-                <div className="space-y-2">
-                    <label htmlFor="edit-status" className="text-sm font-medium">Estado</label>
-                    <select
-                        id="edit-status"
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value as TicketStatus)}
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    >
-                        {ticketStatuses.map((s) => (
-                            <option key={s.value} value={s.value}>
-                                {s.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Deadline & Hours */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label htmlFor="edit-deadline" className="text-sm font-medium">Fecha límite</label>
-                        <Input
-                            id="edit-deadline"
-                            type="date"
-                            value={deadline}
-                            onChange={(e) => setDeadline(e.target.value)}
+            <FormikProvider
+                value={formik}
+            >
+                <Form>
+                    <div className="space-y-4">
+                        <InputField
+                            label="Título del ticket"
+                            name="title"
+                            placeholder="Título del ticket"
+                            tooltip="Ingrese un título para el ticket"
+                            icon={<ListTodo className="h-4 w-4 text-muted-foreground" />}
+                        />
+                        <InputField
+                            label="Descripción del ticket"
+                            name="description"
+                            placeholder="Descripción del ticket"
+                            tooltip="Ingrese una descripción detallada del ticket"
+                            multiline={true}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <SelectField
+                                label="Tipo"
+                                name="type"
+                                options={ticketTypes}
+                                placeholder="Seleccione el tipo de ticket"
+                                tooltip="Seleccione el tipo que mejor describa el ticket"
+                                icon={<ListTodo className="h-4 w-4 text-muted-foreground" />}
+                            />
+                            <SelectField
+                                label="Prioridad"
+                                name="priority"
+                                options={ticketPriorities}
+                                placeholder="Seleccione la prioridad"
+                                tooltip="Seleccione la prioridad del ticket"
+                                icon={<ListTodo className="h-4 w-4 text-muted-foreground" />}
+                            />
+                        </div>
+                        <SelectField
+                            label="Estado"
+                            name="status"
+                            options={ticketStatuses}
+                            placeholder="Seleccione el estado"
+                            tooltip="Seleccione el estado actual del ticket"
+                            icon={<ListTodo className="h-4 w-4 text-muted-foreground" />}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputField
+                                type="date"
+                                name="deadline"
+                                label="Fecha límite"
+                                tooltip="Seleccione la fecha límite para resolver el ticket"
+                            />
+                            <InputField
+                                type="number"
+                                name="estimatedHours"
+                                label="Horas estimadas"
+                                tooltip="Ingrese el número estimado de horas para resolver el ticket"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="edit-tag-input" className="text-sm font-medium">Tags</label>
+                            <div className="flex flex-wrap gap-1 my-2">
+                                {values.tags?.map((tag: string) => (
+                                    <Badge key={tag} variant="info" className="gap-1 pr-1">
+                                        {tag}
+                                        <button
+                                            type="button"
+                                            onClick={() => setFieldValue('tags', values.tags.filter((t: string) => t !== tag))}
+                                            className="ml-0.5 rounded-full hover:bg-muted p-0.5"
+                                        >
+                                            <X className="h-2.5 w-2.5" />
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
+                            <div className="flex gap-2">
+                                <Input
+                                    id="edit-tag-input"
+                                    value={tagInput}
+                                    onChange={(e) => setTagInput(e.target.value)}
+                                    placeholder="Agregar tag..."
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault()
+                                            const trimmed = tagInput.trim()
+                                            if (trimmed && !values.tags.includes(trimmed)) {
+                                                setFieldValue('tags', [...(values.tags || []), trimmed])
+                                                setTagInput("")
+                                            }
+                                        }
+                                    }}
+                                />
+                                <Button type="button" variant="outline" size="sm" onClick={() => {
+                                    const trimmed = tagInput.trim()
+                                    if (trimmed && !values.tags.includes(trimmed)) {
+                                        setFieldValue('tags', [...(values.tags || []), trimmed])
+                                        setTagInput("")
+                                    }
+                                }}>
+                                    Agregar
+                                </Button>
+                            </div>
+                        </div>
+                        <InputField
+                            name="originalPrompt"
+                            label="Prompt original"
+                            tooltip="El prompt original que se usó para generar este ticket (solo lectura)"
+                            multiline={true}
+                            readOnly
+                            disabled
+                            className="italic"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label htmlFor="edit-hours" className="text-sm font-medium">Horas estimadas</label>
-                        <Input
-                            id="edit-hours"
-                            type="number"
-                            min={0}
-                            step={0.5}
-                            value={estimatedHours}
-                            onChange={(e) => setEstimatedHours(parseFloat(e.target.value) || 0)}
-                        />
-                    </div>
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-2">
-                    <label htmlFor="edit-tag-input" className="text-sm font-medium">Tags</label>
-                    <div className="flex flex-wrap gap-1 my-2">
-                        {tags.map((tag) => (
-                            <Badge key={tag} variant="info" className="gap-1 pr-1">
-                                {tag}
-                                <button
-                                    type="button"
-                                    onClick={() => removeTag(tag)}
-                                    className="ml-0.5 rounded-full hover:bg-muted p-0.5"
-                                >
-                                    <X className="h-2.5 w-2.5" />
-                                </button>
-                            </Badge>
-                        ))}
-                    </div>
-                    <div className="flex gap-2">
-                        <Input
-                            id="edit-tag-input"
-                            value={tagInput}
-                            onChange={(e) => setTagInput(e.target.value)}
-                            placeholder="Agregar tag..."
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault()
-                                    addTag()
-                                }
-                            }}
-                        />
-                        <Button type="button" variant="outline" size="sm" onClick={addTag}>
-                            Agregar
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Original Prompt (read-only) */}
-                <div className="space-y-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                        Prompt original
-                    </span>
-                    <p className="text-sm p-3 bg-card rounded-md text-muted-foreground italic">
-                        "{ticket.originalPrompt}"
-                    </p>
-                </div>
-            </div>
+                </Form>
+            </FormikProvider>
         </AppDialog>
     )
 }

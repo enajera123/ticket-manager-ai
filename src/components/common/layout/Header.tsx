@@ -4,6 +4,7 @@ import { UserProfile } from './UserNav'
 import { Button } from '@/components/ui/button'
 import { APP_NAME } from '@/lib/constants/config'
 import ThemeToggle from './ThemeToggle'
+import { ProjectSelector } from '@/components/dashboard/projects/ProjectSelector'
 interface HeaderProps {
     collapsed: boolean
     setCollapsed: (collapsed: boolean) => void
@@ -25,6 +26,7 @@ function Header({ collapsed, setCollapsed }: HeaderProps) {
                     </a>
                 </div>
                 <div className="flex items-center gap-4">
+                    <ProjectSelector />
                     <UserProfile />
                     <ThemeToggle />
                 </div>

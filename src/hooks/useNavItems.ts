@@ -1,6 +1,4 @@
-"use client"
-
-import { BarChart3, UserCog, TicketCheck } from "lucide-react"
+import { BarChart3, UserCog, TicketCheck, Settings, FolderOpen, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/store/useAuthStore"
 const baseNavItems = [
@@ -10,9 +8,24 @@ const baseNavItems = [
         icon: BarChart3,
     },
     {
+        title: "Proyectos",
+        href: "/dashboard/projects",
+        icon: FolderOpen,
+    },
+    {
+        title: "Miembros",
+        href: "/dashboard/members",
+        icon: Users,
+    },
+    {
         title: "Tickets",
         href: "/dashboard/tickets",
         icon: TicketCheck,
+    },
+    {
+        title: "Configuración",
+        href: "/dashboard/config",
+        icon: Settings,
     },
 ]
 const adminNavItems = [

@@ -1,29 +1,26 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
-import type { Ticket, TicketStatus, GenerationCost } from "@/model/Ticket";
-import { classifyTicketWithAI } from "@/ai/openrouter";
+import type { Ticket, GenerationCost } from "@/model/Ticket";
+import { generateId } from "@/lib/random";
+import { classifyTicketWithAI } from "@/ai/tickets/ticketAI";
+import { useOpenRouterConfigStore } from "./openRouter/useOpenRouterConfig";
 
 interface TicketState {
     tickets: Ticket[];
     generationCosts: GenerationCost[];
     isProcessing: boolean;
-    apiKey: string;
-    model: string;
-    setApiKey: (key: string) => void;
-    setModel: (model: string) => void;
-    createTicketFromPrompt: (prompt: string) => Promise<Ticket | null>;
-    updateTicketStatus: (id: string, status: TicketStatus) => void;
-    updateTicket: (id: string, updates: Partial<Omit<Ticket, "id" | "createdAt" | "originalPrompt">>) => void;
+    createTicketFromPrompt: (prompt: string, projectId: string, projectContext?: string) => Promise<Ticket | null>;
+    createTicket: (ticket: Ticket) => void;
+    updateTicket: (id: string, updates: Partial<Omit<Ticket, "id" | "createdAt">>) => void;
     deleteTicket: (id: string) => void;
     getTicketById: (id: string) => Ticket | undefined;
+    getTicketsByProject: (projectId: string) => Ticket[];
     getTotalCost: () => number;
     getCostByModel: () => Record<string, { cost: number; count: number; tokens: number }>;
 }
 
-function generateId(): string {
-    return `TK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-}
+
 
 export const useTicketStore = create<TicketState>()(
     persist(
@@ -33,71 +30,50 @@ export const useTicketStore = create<TicketState>()(
             isProcessing: false,
             apiKey: "",
             model: "",
-
-            setApiKey: (key: string) => set({ apiKey: key }),
-
-            setModel: (model: string) => set({ model }),
-
-            createTicketFromPrompt: async (prompt: string) => {
-                const { apiKey, model } = get();
-
+            createTicketFromPrompt: async (prompt: string, projectId: string, projectContext?: string) => {
+                const { apiKey, model } = useOpenRouterConfigStore.getState();
                 if (!apiKey) {
                     toast.error("API Key requerida", {
                         description: "Configura tu API Key de OpenRouter para generar tickets.",
                     });
                     return null;
                 }
-
                 if (!prompt.trim()) {
                     toast.error("El prompt no puede estar vacío");
                     return null;
                 }
-
                 set({ isProcessing: true });
-
                 try {
-                    const result = await classifyTicketWithAI(prompt, apiKey, model);
-
+                    // Add project context to the prompt if available
+                    const enrichedPrompt = projectContext 
+                        ? `Contexto del proyecto: ${projectContext}\n\nPetición: ${prompt}`
+                        : prompt;
+                    
+                    const { cost, data: ticket } = await classifyTicketWithAI(enrichedPrompt, apiKey, model);
                     const now = new Date().toISOString();
-                    const ticketId = generateId();
-
-                    const ticket: Ticket = {
-                        id: ticketId,
-                        title: result.ticket.title,
-                        description: result.ticket.description,
-                        type: result.ticket.type,
-                        priority: result.ticket.priority,
-                        status: "OPEN",
-                        deadline: result.ticket.deadline,
-                        estimatedHours: result.ticket.estimatedHours,
-                        tags: result.ticket.tags,
+                    const ticketRecord: Ticket = {
+                        ...ticket,
+                        id: generateId("TK"),
+                        projectId,
                         originalPrompt: prompt,
+                        status: "OPEN",
                         createdAt: now,
                         updatedAt: now,
-                    };
-
+                    }
                     const costRecord: GenerationCost = {
-                        id: `COST-${Date.now().toString(36).toUpperCase()}`,
-                        ticketId,
-                        model: result.cost.model,
-                        usage: result.cost.usage,
-                        promptCostPerMillion: result.cost.promptCostPerMillion,
-                        completionCostPerMillion: result.cost.completionCostPerMillion,
-                        totalCost: result.cost.totalCost,
+                        ...cost,
+                        id: generateId("COST"),
                         createdAt: now,
                     };
-
                     set((state) => ({
-                        tickets: [ticket, ...state.tickets],
+                        tickets: [ticketRecord, ...state.tickets],
                         generationCosts: [costRecord, ...state.generationCosts],
                         isProcessing: false,
                     }));
-
                     toast.success("Ticket creado exitosamente", {
-                        description: `${ticket.id}: ${ticket.title}`,
+                        description: `${ticketRecord.id}: ${ticketRecord.title}`,
                     });
-
-                    return ticket;
+                    return ticketRecord;
                 } catch (error) {
                     set({ isProcessing: false });
                     const message = error instanceof Error ? error.message : "Error desconocido";
@@ -106,25 +82,25 @@ export const useTicketStore = create<TicketState>()(
                     return null;
                 }
             },
-
-            updateTicketStatus: (id: string, status: TicketStatus) => {
+            createTicket: (ticket: Ticket) => {
                 set((state) => ({
-                    tickets: state.tickets.map((t) =>
-                        t.id === id ? { ...t, status, updatedAt: new Date().toISOString() } : t
-                    ),
+                    tickets: [{
+                        ...ticket,
+                        id: generateId("TK"),
+                    }, ...state.tickets],
                 }));
-                toast.success("Estado del ticket actualizado");
+                toast.success("Ticket guardado");
             },
-
-            updateTicket: (id: string, updates: Partial<Omit<Ticket, "id" | "createdAt" | "originalPrompt">>) => {
+            updateTicket: (id: string, updates: Partial<Omit<Ticket, "id" | "createdAt">>) => {
                 set((state) => ({
                     tickets: state.tickets.map((t) =>
-                        t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t
+                        t.id === id 
+                            ? { ...t, ...updates, updatedAt: new Date().toISOString() }
+                            : t
                     ),
                 }));
                 toast.success("Ticket actualizado");
             },
-
             deleteTicket: (id: string) => {
                 set((state) => ({
                     tickets: state.tickets.filter((t) => t.id !== id),
@@ -134,6 +110,10 @@ export const useTicketStore = create<TicketState>()(
 
             getTicketById: (id: string) => {
                 return get().tickets.find((t) => t.id === id);
+            },
+
+            getTicketsByProject: (projectId: string) => {
+                return get().tickets.filter((t) => t.projectId === projectId);
             },
 
             getTotalCost: () => {
@@ -159,8 +139,6 @@ export const useTicketStore = create<TicketState>()(
             partialize: (state) => ({
                 tickets: state.tickets,
                 generationCosts: state.generationCosts,
-                apiKey: state.apiKey,
-                model: state.model,
             }),
         }
     )

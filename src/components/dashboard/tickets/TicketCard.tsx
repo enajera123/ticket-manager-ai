@@ -1,58 +1,39 @@
 import { motion } from "framer-motion"
 import {
-    Clock, Tag, Trash2, AlertTriangle,
-    ArrowUp, ArrowRight, ArrowDown, Bug, Lightbulb, Wrench, HelpCircle, ListTodo,
-    Calendar, Pencil
+    Clock, Tag, Trash2, Calendar, Pencil
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useTicketStore } from "@/store/useTicketStore"
-import type { Ticket, TicketPriority, TicketStatus, TicketType } from "@/model/Ticket"
-
-const priorityConfig: Record<TicketPriority, { label: string; variant: "critical" | "destructive" | "warning" | "info"; icon: React.ReactNode }> = {
-    CRITICAL: { label: "Crítica", variant: "critical", icon: <AlertTriangle className="h-3 w-3" /> },
-    HIGH: { label: "Alta", variant: "destructive", icon: <ArrowUp className="h-3 w-3" /> },
-    MEDIUM: { label: "Media", variant: "warning", icon: <ArrowRight className="h-3 w-3" /> },
-    LOW: { label: "Baja", variant: "info", icon: <ArrowDown className="h-3 w-3" /> },
-}
-
-const typeConfig: Record<TicketType, { label: string; icon: React.ReactNode; color: string }> = {
-    BUG: { label: "Bug", icon: <Bug className="h-4 w-4" />, color: "text-red-500" },
-    FEATURE: { label: "Feature", icon: <Lightbulb className="h-4 w-4" />, color: "text-yellow-500" },
-    IMPROVEMENT: { label: "Mejora", icon: <Wrench className="h-4 w-4" />, color: "text-blue-500" },
-    TASK: { label: "Tarea", icon: <ListTodo className="h-4 w-4" />, color: "text-green-500" },
-    SUPPORT: { label: "Soporte", icon: <HelpCircle className="h-4 w-4" />, color: "text-purple-500" },
-}
-
-const statusConfig: Record<TicketStatus, { label: string; variant: "default" | "info" | "success" | "secondary" }> = {
-    OPEN: { label: "Abierto", variant: "default" },
-    IN_PROGRESS: { label: "En Progreso", variant: "info" },
-    RESOLVED: { label: "Resuelto", variant: "success" },
-    CLOSED: { label: "Cerrado", variant: "secondary" },
-}
-
-const statusOrder: TicketStatus[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]
+import type { Ticket } from "@/model/Ticket"
+import { getDaysLeft } from "@/lib/utils/date"
+import { showConfirmationAlert } from "@/lib/utils/alert"
+import { useMappers } from "@/hooks/useMappers"
 
 export function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket: Ticket) => void }) {
-    const { updateTicketStatus, deleteTicket } = useTicketStore()
-
+    const { priorityConfig, typeConfig, statusConfig, statusOrder } = useMappers()
+    const { updateTicket, deleteTicket } = useTicketStore()
     const priority = priorityConfig[ticket.priority]
     const type = typeConfig[ticket.type]
     const status = statusConfig[ticket.status]
 
     const deadlineDate = new Date(ticket.deadline + "T00:00:00")
-    const now = new Date()
-    const isOverdue = deadlineDate < now && ticket.status !== "CLOSED" && ticket.status !== "RESOLVED"
-    const daysLeft = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const isOverdue = deadlineDate < new Date() && ticket.status !== "CLOSED" && ticket.status !== "RESOLVED"
+    const daysLeft = getDaysLeft(deadlineDate)
 
     const nextStatus = () => {
         const currentIndex = statusOrder.indexOf(ticket.status)
         if (currentIndex < statusOrder.length - 1) {
-            updateTicketStatus(ticket.id, statusOrder[currentIndex + 1])
+            const nextStatus = statusOrder[currentIndex + 1]
+            updateTicket(ticket.id, { status: nextStatus })
         }
     }
-
+    const handleDelete = async () => {
+        const confirmation = await showConfirmationAlert("¿Eliminar ticket?", "Esta acción no se puede deshacer. ¿Deseas continuar?");
+        if (!confirmation.isConfirmed) return;
+        deleteTicket(ticket.id);
+    }
     return (
         <motion.div
             layout
@@ -61,7 +42,7 @@ export function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
         >
-            <Card className={`hover:shadow-md transition-shadow ${isOverdue ? "border-red-300 dark:border-red-800" : ""}`}>
+            <Card className={`hover:shadow-md transition-shadow ${type.cardClass} ${isOverdue ? "border-red-300 dark:border-red-800" : ""}`}>
                 <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
@@ -141,7 +122,7 @@ export function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => deleteTicket(ticket.id)}
+                            onClick={handleDelete}
                             className="text-xs h-7 text-destructive hover:text-destructive"
                         >
                             <Trash2 className="h-3 w-3" />

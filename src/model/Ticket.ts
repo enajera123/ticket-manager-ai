@@ -4,6 +4,7 @@ export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
 
 export interface Ticket {
     id: string;
+    projectId: string;
     title: string;
     description: string;
     type: TicketType;
@@ -12,21 +13,11 @@ export interface Ticket {
     deadline: string;
     estimatedHours: number;
     tags: string[];
+    assignedTo?: string; // Member ID
     originalPrompt: string;
     createdAt: string;
     updatedAt: string;
 }
-
-export interface AITicketResponse {
-    title: string;
-    description: string;
-    type: TicketType;
-    priority: TicketPriority;
-    estimatedHours: number;
-    deadline: string;
-    tags: string[];
-}
-
 export interface TokenUsage {
     promptTokens: number;
     completionTokens: number;
@@ -35,7 +26,6 @@ export interface TokenUsage {
 
 export interface GenerationCost {
     id: string;
-    ticketId: string;
     model: string;
     usage: TokenUsage;
     promptCostPerMillion: number;
@@ -44,7 +34,3 @@ export interface GenerationCost {
     createdAt: string;
 }
 
-export interface AIClassificationResult {
-    ticket: AITicketResponse;
-    cost: Omit<GenerationCost, "id" | "ticketId" | "createdAt">;
-}

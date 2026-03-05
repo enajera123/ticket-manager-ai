@@ -2,7 +2,7 @@
 
 import type { OpenRouterModel } from "@/model/openRouter/Model"
 import { useLoaderStore } from "@/store/useLoaderStore"
-import { useOpenRouterModelStore } from "@/store/useOpenRouterModelStore"
+import { useOpenRouterModelStore } from "@/store/openRouter/useOpenRouterModelStore"
 import { useEffect, useCallback, useRef } from "react"
 
 interface UseOpenRouterModelsReturn {
