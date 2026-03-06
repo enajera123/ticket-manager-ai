@@ -59,7 +59,7 @@ export function AppDialog({
                 if (!allowOutsideClick) {
                     e.preventDefault()
                 }
-            }} className={maxWidth}>
+            }} className={`${maxWidth} custom-scroll`}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     {description && (

@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTicket } from '@/hooks/stores/useTicket';
 import { formatCost, formatTokens } from '@/lib/utils/parse';
-import { useTicketStore } from '@/store/useTicketStore';
 import { BarChart3, Cpu } from 'lucide-react';
 export function BillingByModel() {
-    const { generationCosts } = useTicketStore()
+    const { generationCosts } = useTicket()
 
     const modelMap: Record<string, { cost: number; count: number; tokens: number }> = {}
     for (const c of generationCosts) {

@@ -1,5 +1,3 @@
-'use client'
-
 import type { OpenRouterModel } from "@/model/openRouter/Model"
 import { useLoaderStore } from "@/store/useLoaderStore"
 import { useOpenRouterModelStore } from "@/store/openRouter/useOpenRouterModelStore"

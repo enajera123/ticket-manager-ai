@@ -1,13 +1,9 @@
-import { useTicketStore } from "@/store/useTicketStore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bug, Lightbulb, ListTodo, AlertTriangle, CheckCircle } from "lucide-react"
-import { useProject } from "@/hooks/stores/useProject"
-import { use } from "react"
+import { useTicket } from "@/hooks/stores/useTicket"
 
 export function TicketStats() {
-    const { getTicketsByProject } = useTicketStore()
-    const { currentProject } = useProject()
-    const tickets = use(getTicketsByProject(currentProject?.id || -1))
+    const { tickets } = useTicket()
     const stats = {
         total: tickets.length,
         open: tickets.filter((t) => t.status === "OPEN").length,

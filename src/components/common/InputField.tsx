@@ -14,10 +14,12 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     tooltip?: string
     icon?: React.ReactNode
     multiline?: boolean
+    lines?: number
 }
-function InputField({ name, label, placeholder, type = "text", tooltip, multiline = false, icon, ...props }: InputFieldProps) {
+function InputField({ name, label, placeholder, type = "text", tooltip, multiline = false, icon, lines, ...props }: InputFieldProps) {
     const combinedClass = [
         !multiline && icon ? "pl-10" : "",
+        "custom-scroll",
         props.className
     ].join(" ")
     return (
@@ -26,16 +28,18 @@ function InputField({ name, label, placeholder, type = "text", tooltip, multilin
                 <label htmlFor={name} className="text-sm font-medium">
                     {label}
                 </label>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p className="text-background">{tooltip}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                {tooltip && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-background">{tooltip}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
             </div>
             <div className="relative">
                 <Field name={name}>
@@ -47,7 +51,7 @@ function InputField({ name, label, placeholder, type = "text", tooltip, multilin
                             {!multiline ? (
                                 <Input id={name} placeholder={placeholder} className={combinedClass} type={type} {...field} {...props} />
                             ) : (
-                                <Textarea id={name} placeholder={placeholder} className={combinedClass} {...field} {...props} />
+                                <Textarea id={name} placeholder={placeholder} className={combinedClass} {...field} {...props} rows={lines} />
                             )}
                         </div>
                     )}

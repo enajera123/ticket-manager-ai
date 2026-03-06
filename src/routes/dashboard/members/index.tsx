@@ -1,5 +1,3 @@
-'use client'
-
 import { PageTransition } from "@/components/common/layout/PageTransition"
 import { MemberList } from "@/components/dashboard/members/MemberList"
 

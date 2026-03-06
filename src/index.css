@@ -229,3 +229,41 @@
 .app-swal-cancel:hover {
   background: var(--muted) !important;
 }
+
+
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted-foreground) transparent;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 4px;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-muted-foreground) 35%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+html:hover::-webkit-scrollbar-thumb,
+body:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-primary) 45%, transparent);
+}
+
+html::-webkit-scrollbar-thumb:active,
+body::-webkit-scrollbar-thumb:active {
+  background: var(--color-primary);
+  transform: scaleY(1.05);
+}

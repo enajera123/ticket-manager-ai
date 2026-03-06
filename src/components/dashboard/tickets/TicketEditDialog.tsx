@@ -11,6 +11,7 @@ import InputField from "@/components/common/InputField"
 import SelectField from "@/components/common/SelectField"
 import { useCrudTickets } from "@/hooks/tickets/useCrudTickets"
 import { useProject } from "@/hooks/stores/useProject"
+import ButtonGroupField from "@/components/common/ButtonGroupField"
 
 const ticketTypes: { value: TicketType; label: string }[] = [
     { value: "BUG", label: "Bug" },
@@ -62,8 +63,8 @@ export function TicketEditDialog({ ticket, open, onOpenChange }: TicketEditDialo
         <AppDialog
             open={open}
             onOpenChange={onOpenChange}
-            title={ticket?.id ? "Editar ticket" : "Crear ticket"}
-            description={ticket?.id ? `Editando: ${ticket.title}` : "Crea un nuevo ticket para tu proyecto"}
+            title={ticket?.id ? `${ticket.title}` : "Crear ticket"}
+            description={ticket?.id ? `` : "Crea un nuevo ticket para tu proyecto"}
             showFooter={true}
             onCancel={() => onOpenChange(false)}
             onConfirm={() => formik.submitForm()}
@@ -90,6 +91,7 @@ export function TicketEditDialog({ ticket, open, onOpenChange }: TicketEditDialo
                             placeholder="Descripción del ticket"
                             tooltip="Ingrese una descripción detallada del ticket"
                             multiline={true}
+                            lines={5}
                         />
                         <div className="grid grid-cols-2 gap-4">
                             <SelectField
@@ -109,13 +111,11 @@ export function TicketEditDialog({ ticket, open, onOpenChange }: TicketEditDialo
                                 icon={<ListTodo className="h-4 w-4 text-muted-foreground" />}
                             />
                         </div>
-                        <SelectField
-                            label="Estado"
+                        <ButtonGroupField
                             name="status"
+                            label="Estado"
                             options={ticketStatuses}
-                            placeholder="Seleccione el estado"
                             tooltip="Seleccione el estado actual del ticket"
-                            icon={<ListTodo className="h-4 w-4 text-muted-foreground" />}
                         />
                         <div className="grid grid-cols-2 gap-4">
                             <InputField

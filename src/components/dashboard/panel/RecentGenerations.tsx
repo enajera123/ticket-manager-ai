@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTicket } from "@/hooks/stores/useTicket"
 import { formatCost, formatTokens } from "@/lib/utils/parse"
-import { useTicketStore } from "@/store/useTicketStore"
 import { Zap } from "lucide-react"
 
 export function RecentGenerations() {
-    const { generationCosts } = useTicketStore()
+    const { generationCosts } = useTicket()
 
     const recent = generationCosts.slice(0, 10)
 

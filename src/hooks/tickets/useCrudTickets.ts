@@ -1,8 +1,8 @@
 import type { Ticket } from "@/model/Ticket"
-import { useTicketStore } from "@/store/useTicketStore"
+import { useTicket } from "../stores/useTicket"
 
 export function useCrudTickets() {
-    const { createTicket, updateTicket } = useTicketStore()
+    const { createTicket, updateTicket } = useTicket()
     const handleSave = (ticket: Ticket) => {
         if (ticket?.id) {
             const { id, created_at, ...updates } = ticket

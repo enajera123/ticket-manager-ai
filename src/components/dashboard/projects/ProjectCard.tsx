@@ -1,14 +1,12 @@
-'use client'
-
 import { motion } from "framer-motion"
 import { Pencil, Trash2, Users, ListTodo } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useTicketStore } from "@/store/useTicketStore"
 import { useMemberStore } from "@/store/useMemberStore"
 import type { Project } from "@/model/Project"
 import { useProject } from "@/hooks/stores/useProject"
 import { showConfirmationAlert } from "@/lib/utils/alert"
+import { useTicket } from "@/hooks/stores/useTicket"
 
 interface ProjectCardProps {
     project: Required<Project>
@@ -17,7 +15,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onEdit }: ProjectCardProps) {
     const { deleteProject, setCurrentProject, currentProject } = useProject()
-    const { tickets } = useTicketStore()
+    const { tickets } = useTicket()
     const { members } = useMemberStore()
 
     const projectTickets = tickets.filter((t) => t.projectId === project.id)

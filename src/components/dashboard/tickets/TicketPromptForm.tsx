@@ -1,17 +1,14 @@
-'use client'
-
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Send, Loader2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useTicketStore } from "@/store/useTicketStore"
 import { useProject } from "@/hooks/stores/useProject"
-
+import { useTicket } from "@/hooks/stores/useTicket"
 
 export function TicketPromptForm() {
-    const { createTicketFromPrompt, isProcessing } = useTicketStore()
+    const { createTicketFromPrompt, isProcessing } = useTicket()
     const { currentProject } = useProject()
     const [prompt, setPrompt] = useState("")
 

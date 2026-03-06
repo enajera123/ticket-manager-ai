@@ -1,13 +1,11 @@
-'use client'
-
-import { useTicketStore } from "@/store/useTicketStore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, Zap, TrendingUp, Hash } from "lucide-react"
 import { formatCost, formatTokens } from "@/lib/utils/parse"
+import { useTicket } from "@/hooks/stores/useTicket"
 
 
 export function BillingStats() {
-    const { generationCosts, tickets } = useTicketStore()
+    const { generationCosts, tickets } = useTicket()
 
     const totalCost = generationCosts.reduce((sum, c) => sum + c.totalCost, 0)
     const totalTokens = generationCosts.reduce((sum, c) => sum + c.usage.totalTokens, 0)

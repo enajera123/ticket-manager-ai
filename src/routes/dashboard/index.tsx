@@ -1,10 +1,8 @@
-'use client'
 import { PageTransition } from "@/components/common/layout/PageTransition"
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Suspense } from "react"
-import { useTicketStore } from "@/store/useTicketStore"
 import {
     TicketCheck, CheckCircle, Clock, AlertTriangle, ArrowUpCircle, TrendingDown
 } from "lucide-react"
@@ -13,9 +11,10 @@ import { BillingStats } from "@/components/dashboard/panel/BillingStats"
 import BillingByModel from "@/components/dashboard/panel/BillingByModel"
 import { RecentGenerations } from "@/components/dashboard/panel/RecentGenerations"
 import { useMappers } from "@/hooks/useMappers"
+import { useTicket } from "@/hooks/stores/useTicket"
 
 export default function DashboardPage() {
-    const { tickets } = useTicketStore()
+    const { tickets } = useTicket()
     const { typeConfig, statusConfig } = useMappers()
     const total = tickets.length
     const open = tickets.filter((t) => t.status === "OPEN").length

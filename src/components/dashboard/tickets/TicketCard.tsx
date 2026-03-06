@@ -5,15 +5,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useTicketStore } from "@/store/useTicketStore"
 import type { Ticket } from "@/model/Ticket"
 import { getDaysLeft } from "@/lib/utils/date"
 import { showConfirmationAlert } from "@/lib/utils/alert"
 import { useMappers } from "@/hooks/useMappers"
+import { useTicket } from "@/hooks/stores/useTicket"
 
 export function TicketCard({ ticket, onEdit }: { ticket: Required<Ticket>; onEdit: (ticket: Ticket) => void }) {
     const { priorityConfig, typeConfig, statusConfig, statusOrder } = useMappers()
-    const { updateTicket, deleteTicket } = useTicketStore()
+    const { updateTicket, deleteTicket } = useTicket()
     const priority = priorityConfig[ticket.priority]
     const type = typeConfig[ticket.type]
     const status = statusConfig[ticket.status]
@@ -45,15 +45,14 @@ export function TicketCard({ ticket, onEdit }: { ticket: Required<Ticket>; onEdi
             <Card className={`hover:shadow-md transition-shadow ${type.cardClass} ${isOverdue ? "border-red-300 dark:border-red-800" : ""}`}>
                 <CardHeader>
                     <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                            <span className={type.color}>{type.icon}</span>
-                            <CardTitle className="text-sm font-semibold truncate">
+                        <div className="flex items-start gap-2 min-w-0 flex-1">
+                            <span className={`${type.color} shrink-0 mt-0.5`}>{type.icon}</span>
+                            <CardTitle className="text-sm font-semibold break-words">
                                 {ticket.title}
                             </CardTitle>
                         </div>
                     </div>
-                    <p className="text-xs text-muted-foreground font-mono">{ticket.id}</p>
-                    <div className="flex gap-1 shrink-0">
+                    <div className="flex gap-1 shrink-0 flex-wrap mt-2">
                         <Badge variant={priority.variant} className="gap-1 text-[10px]">
                             {priority.icon}
                             {priority.label}

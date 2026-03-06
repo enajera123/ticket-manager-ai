@@ -1,5 +1,3 @@
-'use client'
-
 import { Formik, Form } from "formik"
 import * as Yup from "yup"
 import { AppDialog } from "@/components/common/AppDialog"

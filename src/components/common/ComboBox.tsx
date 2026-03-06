@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -111,9 +109,7 @@ export function GenericCombobox<T>({
                         onScroll={handleScroll}
                         className={cn(
                             "max-h-70 overflow-y-auto",
-                            // Scrollbar styles:
                             "scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-muted scrollbar-track-transparent",
-                            // For browsers that support ::-webkit-scrollbar
                             "custom-scroll"
                         )}
                     >

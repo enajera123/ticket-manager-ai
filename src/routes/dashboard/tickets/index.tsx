@@ -1,5 +1,3 @@
-'use client'
-
 import { PageTransition } from "@/components/common/layout/PageTransition"
 import { TicketPromptForm } from "@/components/dashboard/tickets/TicketPromptForm"
 import { TicketList } from "@/components/dashboard/tickets/TicketList"

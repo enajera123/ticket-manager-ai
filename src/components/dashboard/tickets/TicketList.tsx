@@ -1,17 +1,16 @@
 import type { Ticket } from "@/model/Ticket"
-import { useTicketStore } from "@/store/useTicketStore"
-import { use, useState } from "react"
+import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { ListTodo, Plus } from "lucide-react"
 import { TicketCard } from "./TicketCard"
 import { TicketEditDialog } from "./TicketEditDialog"
 import { Button } from "@/components/ui/button"
 import { useProject } from "@/hooks/stores/useProject"
+import { useTicket } from "@/hooks/stores/useTicket"
 
 export function TicketList() {
-    const { getTicketsByProject } = useTicketStore()
+    const { tickets } = useTicket()
     const { currentProject } = useProject()
-    const tickets = use(getTicketsByProject(currentProject?.id || -1))
 
     const [editingTicket, setEditingTicket] = useState<Ticket | null>(null)
     const [editDialogOpen, setEditDialogOpen] = useState(false)

@@ -1,5 +1,3 @@
-'use client'
-
 import { PageTransition } from "@/components/common/layout/PageTransition"
 import { ProjectList } from "@/components/dashboard/projects/ProjectList"
 

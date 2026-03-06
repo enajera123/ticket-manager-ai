@@ -15,7 +15,7 @@ interface ProjectState {
 }
 
 export const useProjectStore = create<ProjectState>()(
-    persist((set, get) => ({
+    persist((set) => ({
         projects: [],
         currentProject: null,
         createProject: async (project) => {
