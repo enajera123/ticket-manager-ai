@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTicket } from '@/hooks/stores/useTicket';
 import { formatCost, formatTokens } from '@/lib/utils/parse';
+import { useGenerationCostStore } from '@/store/useGenerationCostStore';
 import { BarChart3, Cpu } from 'lucide-react';
+import { use } from 'react';
 export function BillingByModel() {
-    const { generationCosts } = useTicket()
+    const { getCostByModel } = useGenerationCostStore()
+    const generationCosts = use(getCostByModel())
 
     const modelMap: Record<string, { cost: number; count: number; tokens: number }> = {}
     for (const c of generationCosts) {
@@ -12,7 +14,7 @@ export function BillingByModel() {
         }
         modelMap[c.model].cost += c.totalCost
         modelMap[c.model].count += 1
-        modelMap[c.model].tokens += c.usage.totalTokens
+        modelMap[c.model].tokens += c.totalTokens
     }
 
     const models = Object.entries(modelMap).sort((a, b) => b[1].cost - a[1].cost)

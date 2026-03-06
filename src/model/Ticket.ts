@@ -17,19 +17,3 @@ export interface Ticket {
     originalPrompt: string;
     created_at?: string;
 }
-export interface TokenUsage {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-}
-
-export interface GenerationCost {
-    id: string;
-    model: string;
-    usage: TokenUsage;
-    promptCostPerMillion: number;
-    completionCostPerMillion: number;
-    totalCost: number;
-    created_at: string;
-}
-

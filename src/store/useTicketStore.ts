@@ -1,27 +1,23 @@
 import { create } from "zustand";
 import { toast } from "sonner";
-import type { Ticket, GenerationCost } from "@/model/Ticket";
-import { generateId } from "@/lib/utils/random";
+import type { Ticket } from "@/model/Ticket";
 import { classifyTicketWithAI } from "@/ai/tickets/ticketAI";
 import { useOpenRouterConfigStore } from "./openRouter/useOpenRouterConfig";
 import TicketService from "@/services/ticket";
+import { useGenerationCostStore } from "./useGenerationCostStore";
 interface TicketState {
     tickets: Ticket[];
-    generationCosts: GenerationCost[];
     isProcessing: boolean;
     createTicketFromPrompt: (prompt: string, projectId: number, projectContext?: string) => Promise<Ticket | null>;
     createTicket: (ticket: Ticket) => Promise<Ticket | null>;
     updateTicket: (id: number, ticket: Ticket) => Promise<Ticket | null>;
     deleteTicket: (id: number) => Promise<void>;
     getTicketsByProject: (projectId: number) => Promise<Ticket[]>;
-    getTotalCost: () => number;
-    getCostByModel: () => Record<string, { cost: number; count: number; tokens: number }>;
 }
 
 export const useTicketStore = create<TicketState>((set, get) => {
     return {
         tickets: [],
-        generationCosts: [],
         isProcessing: false,
         apiKey: "",
         model: "",
@@ -44,21 +40,16 @@ export const useTicketStore = create<TicketState>((set, get) => {
                     : prompt;
 
                 const { cost, data: ticket } = await classifyTicketWithAI(enrichedPrompt, apiKey, model);
-                const now = new Date().toISOString();
                 const ticketRecord: Ticket = {
                     ...ticket,
                     projectId,
                     originalPrompt: prompt,
                     status: "OPEN",
                 }
-                const costRecord: GenerationCost = {
-                    ...cost,
-                    id: generateId("COST"),
-                    created_at: now,
-                };
                 const { data: ticketData, error } = await TicketService.createTicket({
                     ...ticketRecord,
                 });
+                useGenerationCostStore.getState().createGenerationCost(cost);
                 if (!ticketData) {
                     set({ isProcessing: false });
                     toast.error("Error al crear ticket", { description: error?.message });
@@ -67,7 +58,6 @@ export const useTicketStore = create<TicketState>((set, get) => {
                 }
                 set((state) => ({
                     tickets: [ticketData, ...state.tickets],
-                    generationCosts: [costRecord, ...state.generationCosts],
                     isProcessing: false,
                 }));
                 toast.success("Ticket creado exitosamente", {
@@ -121,22 +111,5 @@ export const useTicketStore = create<TicketState>((set, get) => {
             return tickets;
         },
 
-        getTotalCost: () => {
-            return get().generationCosts.reduce((sum, c) => sum + c.totalCost, 0);
-        },
-
-        getCostByModel: () => {
-            const costs = get().generationCosts;
-            const map: Record<string, { cost: number; count: number; tokens: number }> = {};
-            for (const c of costs) {
-                if (!map[c.model]) {
-                    map[c.model] = { cost: 0, count: 0, tokens: 0 };
-                }
-                map[c.model].cost += c.totalCost;
-                map[c.model].count += 1;
-                map[c.model].tokens += c.usage.totalTokens;
-            }
-            return map;
-        },
     }
 })

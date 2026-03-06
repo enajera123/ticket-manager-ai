@@ -66,6 +66,19 @@ export function SettingsForm() {
                                 placeholder="sk-or-v1-..."
                                 className="font-mono text-sm"
                             />
+                            <div className="border-t">
+                                <p className="text-xs text-muted-foreground">
+                                    Tu API Key en{" "}
+                                    <a
+                                        href="https://openrouter.ai/settings/keys"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline"
+                                    >
+                                        configuración de OpenRouter
+                                    </a>.
+                                </p>
+                            </div>
                         </div>
 
                         <div className="space-y-2">

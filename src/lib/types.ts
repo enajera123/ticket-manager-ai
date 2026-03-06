@@ -1,3 +1,5 @@
+import type { GenerationCost } from "@/model/GenerationCost"
+
 export interface PaginationType {
     page: number
     limit: number
@@ -27,7 +29,7 @@ export interface AICost {
 
 export interface AIResponse<T> {
     data: T;
-    cost: AICost;
+    cost: GenerationCost;
 }
 
 export interface AIRequestConfig {

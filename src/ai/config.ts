@@ -67,13 +67,11 @@ export async function runAI<T>({
         data: parsed,
         cost: {
             model,
-            usage: {
-                promptTokens,
-                completionTokens,
-                totalTokens,
-            },
-            promptCostPerMillion: promptPrice * 1_000_000,
-            completionCostPerMillion: completionPrice * 1_000_000,
+            completionCost: completionCost,
+            promptCost: promptCost,
+            totalTokens,
+            completionTokens,
+            promptTokens,
             totalCost,
         },
     };
