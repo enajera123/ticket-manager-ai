@@ -178,8 +178,54 @@
 }
 
 
-.swal2-backdrop-show {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  background-color: rgba(0,0,0,0.35) !important;
+/* SWEETALERT THEME */
+
+.app-swal-popup {
+  background: var(--card);
+  color: var(--foreground);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+}
+
+.app-swal-title {
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.app-swal-text {
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+
+.app-swal-actions {
+  gap: 0.5rem;
+}
+
+.app-swal-confirm {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.app-swal-confirm:hover {
+  filter: brightness(1.1);
+}
+
+.app-swal-cancel {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.15s ease;
+}
+
+.app-swal-cancel:hover {
+  background: var(--muted) !important;
 }

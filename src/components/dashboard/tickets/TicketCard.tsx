@@ -11,7 +11,7 @@ import { getDaysLeft } from "@/lib/utils/date"
 import { showConfirmationAlert } from "@/lib/utils/alert"
 import { useMappers } from "@/hooks/useMappers"
 
-export function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket: Ticket) => void }) {
+export function TicketCard({ ticket, onEdit }: { ticket: Required<Ticket>; onEdit: (ticket: Ticket) => void }) {
     const { priorityConfig, typeConfig, statusConfig, statusOrder } = useMappers()
     const { updateTicket, deleteTicket } = useTicketStore()
     const priority = priorityConfig[ticket.priority]
@@ -26,7 +26,7 @@ export function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket
         const currentIndex = statusOrder.indexOf(ticket.status)
         if (currentIndex < statusOrder.length - 1) {
             const nextStatus = statusOrder[currentIndex + 1]
-            updateTicket(ticket.id, { status: nextStatus })
+            updateTicket(ticket.id, { status: nextStatus } as Ticket)
         }
     }
     const handleDelete = async () => {
@@ -88,7 +88,7 @@ export function TicketCard({ ticket, onEdit }: { ticket: Ticket; onEdit: (ticket
                                 {isOverdue ? `Vencido (${Math.abs(daysLeft)}d)` : `${daysLeft}d restantes`}
                             </span>
                         </div>
-                        <span>{new Date(ticket.createdAt).toLocaleDateString("es")}</span>
+                        <span>{new Date(ticket.created_at).toLocaleDateString("es")}</span>
                     </div>
 
                     <details className="text-xs">

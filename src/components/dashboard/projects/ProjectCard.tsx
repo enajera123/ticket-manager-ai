@@ -4,41 +4,30 @@ import { motion } from "framer-motion"
 import { Pencil, Trash2, Users, ListTodo } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useProjectStore } from "@/store/useProjectStore"
 import { useTicketStore } from "@/store/useTicketStore"
 import { useMemberStore } from "@/store/useMemberStore"
 import type { Project } from "@/model/Project"
-import swal from "sweetalert2"
+import { useProject } from "@/hooks/stores/useProject"
+import { showConfirmationAlert } from "@/lib/utils/alert"
 
 interface ProjectCardProps {
-    project: Project
+    project: Required<Project>
     onEdit: (project: Project) => void
 }
 
 export function ProjectCard({ project, onEdit }: ProjectCardProps) {
-    const { deleteProject, setCurrentProject, currentProjectId } = useProjectStore()
+    const { deleteProject, setCurrentProject, currentProject } = useProject()
     const { tickets } = useTicketStore()
     const { members } = useMemberStore()
 
     const projectTickets = tickets.filter((t) => t.projectId === project.id)
     const projectMembers = members.filter((m) => m.projectId === project.id)
-    const isActive = currentProjectId === project.id
+    const isActive = currentProject?.id === project.id
 
-    const handleDelete = () => {
-        swal.fire({
-            title: "¿Eliminar proyecto?",
-            text: `Se eliminarán ${projectTickets.length} tickets y ${projectMembers.length} miembros asociados.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Eliminar",
-            cancelButtonText: "Cancelar",
-            confirmButtonColor: "#ef4444",
-            cancelButtonColor: "#6b7280",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                deleteProject(project.id)
-            }
-        })
+    const handleDelete = async () => {
+        const result = await showConfirmationAlert("¿Eliminar proyecto?", `Se eliminarán ${projectTickets.length} tickets y ${projectMembers.length} miembros asociados.`)
+        if (!result.isConfirmed) return
+        deleteProject(project.id)
     }
 
     return (
@@ -50,18 +39,17 @@ export function ProjectCard({ project, onEdit }: ProjectCardProps) {
             transition={{ duration: 0.2 }}
         >
             <Card
-                className={`hover:shadow-md transition-all cursor-pointer ${
-                    isActive ? "ring-2 ring-primary" : ""
-                }`}
-                onClick={() => setCurrentProject(project.id)}
+                className={`hover:shadow-md transition-all cursor-pointer border-l-4 ${isActive ? "ring-2 bg-muted/50" : ""
+                    }`}
+                style={{
+                    borderLeftColor: project.color,
+                    ...(isActive && { '--tw-ring-color': project.color } as React.CSSProperties)
+                }}
+                onClick={() => setCurrentProject(project)}
             >
                 <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                            <div
-                                className="w-3 h-3 rounded-full shrink-0"
-                                style={{ backgroundColor: project.color }}
-                            />
                             <CardTitle className="text-base font-semibold truncate">
                                 {project.name}
                             </CardTitle>

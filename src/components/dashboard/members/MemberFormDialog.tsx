@@ -24,7 +24,7 @@ const ROLES: { value: MemberRole; label: string; description: string }[] = [
 interface MemberFormDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    projectId: string
+    projectId: number
     member?: Member | null
 }
 

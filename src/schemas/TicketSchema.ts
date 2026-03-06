@@ -11,8 +11,6 @@ export const TicketSchema = Yup.object().shape({
     estimatedHours: Yup.number().min(0, "Estimated hours must be a positive number").required("Estimated hours are required"),
     tags: Yup.array().of(Yup.string()).required("At least one tag is required"),
     assignedTo: Yup.string().optional(),
-    createdAt: Yup.string().required("Created at is required"),
-    updatedAt: Yup.string().required("Updated at is required"),
 })
 
 export const ticketInitialValues = (ticket: Ticket | null) => {
@@ -32,7 +30,5 @@ export const ticketInitialValues = (ticket: Ticket | null) => {
         tags: ticket?.tags || [],
         assignedTo: ticket?.assignedTo,
         originalPrompt: ticket?.originalPrompt || "",
-        createdAt: ticket?.createdAt || new Date().toISOString(),
-        updatedAt: ticket?.updatedAt || new Date().toISOString(),
     } as Partial<Ticket>
 };

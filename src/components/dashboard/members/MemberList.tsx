@@ -4,15 +4,14 @@ import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useMemberStore } from "@/store/useMemberStore"
-import { useProjectStore } from "@/store/useProjectStore"
 import { MemberCard } from "./MemberCard"
 import { MemberFormDialog } from "./MemberFormDialog"
 import type { Member } from "@/model/Member"
+import { useProject } from "@/hooks/stores/useProject"
 
 export function MemberList() {
     const { members } = useMemberStore()
-    const { getCurrentProject } = useProjectStore()
-    const currentProject = getCurrentProject()
+    const { currentProject } = useProject()
     const [editingMember, setEditingMember] = useState<Member | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -80,7 +79,7 @@ export function MemberList() {
                 <MemberFormDialog
                     open={dialogOpen}
                     onOpenChange={handleCloseDialog}
-                    projectId={currentProject.id}
+                    projectId={currentProject?.id || 0}
                     member={editingMember}
                 />
             )}

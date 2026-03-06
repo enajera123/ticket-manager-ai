@@ -5,7 +5,7 @@ export function useCrudTickets() {
     const { createTicket, updateTicket } = useTicketStore()
     const handleSave = (ticket: Ticket) => {
         if (ticket?.id) {
-            const { id, createdAt, ...updates } = ticket
+            const { id, created_at, ...updates } = ticket
             updateTicket(id, updates)
         } else {
             createTicket(ticket)

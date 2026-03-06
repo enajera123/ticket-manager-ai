@@ -2,7 +2,7 @@ export type MemberRole = "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
 
 export interface Member {
     id: string;
-    projectId: string;
+    projectId: number;
     name: string;
     email: string;
     role: MemberRole;

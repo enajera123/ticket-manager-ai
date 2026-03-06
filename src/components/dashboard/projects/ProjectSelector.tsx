@@ -10,13 +10,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useProjectStore } from "@/store/useProjectStore"
 import { useNavigate } from "react-router-dom"
+import type { Project } from "@/model/Project"
+import { useProject } from "@/hooks/stores/useProject"
 
 export function ProjectSelector() {
-    const { projects, currentProjectId, setCurrentProject, getCurrentProject } = useProjectStore()
+    const { projects, currentProject, setCurrentProject } = useProject()
     const navigate = useNavigate()
-    const currentProject = getCurrentProject()
 
     if (projects.length === 0) {
         return (
@@ -35,7 +35,7 @@ export function ProjectSelector() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 min-w-[200px] justify-between">
+                <Button variant="outline" size="sm" className="gap-2 min-w-50 justify-between">
                     <div className="flex items-center gap-2 overflow-hidden">
                         {currentProject && (
                             <div
@@ -50,13 +50,13 @@ export function ProjectSelector() {
                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[250px]">
+            <DropdownMenuContent align="start" className="w-62.5">
                 <DropdownMenuLabel>Proyectos</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {projects.map((project) => (
+                {(projects as Required<Project>[]).map((project) => (
                     <DropdownMenuItem
                         key={project.id}
-                        onClick={() => setCurrentProject(project.id)}
+                        onClick={() => setCurrentProject(project)}
                         className="flex items-center gap-2 cursor-pointer"
                     >
                         <div
@@ -64,7 +64,7 @@ export function ProjectSelector() {
                             style={{ backgroundColor: project.color }}
                         />
                         <span className="flex-1 truncate">{project.name}</span>
-                        {currentProjectId === project.id && (
+                        {currentProject?.id === project.id && (
                             <Check className="h-4 w-4 shrink-0" />
                         )}
                     </DropdownMenuItem>

@@ -1,81 +1,87 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import type { Project } from "@/model/Project";
-import { generateId } from "@/lib/random";
+import ProjectService from "@/services/project";
+import { persist } from "zustand/middleware";
 
 interface ProjectState {
     projects: Project[];
-    currentProjectId: string | null;
-    createProject: (project: Omit<Project, "id" | "createdAt" | "updatedAt">) => void;
-    updateProject: (id: string, updates: Partial<Omit<Project, "id" | "createdAt" | "updatedAt">>) => void;
-    deleteProject: (id: string) => void;
-    getProjectById: (id: string) => Project | undefined;
-    setCurrentProject: (id: string | null) => void;
-    getCurrentProject: () => Project | undefined;
+    currentProject: Project | null;
+    createProject: (project: Project) => Promise<Project | null>;
+    updateProject: (id: number, project: Project) => Promise<Project | null>;
+    deleteProject: (id: number) => Promise<void>;
+    setCurrentProject: (project: Project) => void;
+    getProjects: () => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState>()(
-    persist(
-        (set, get) => ({
-            projects: [],
-            currentProjectId: null,
-            
-            createProject: (projectData) => {
-                const now = new Date().toISOString();
-                const project: Project = {
-                    ...projectData,
-                    id: generateId("PRJ"),
-                    createdAt: now,
-                    updatedAt: now,
-                };
-                
-                set((state) => ({
-                    projects: [project, ...state.projects],
-                    currentProjectId: state.currentProjectId || project.id, // Auto-select first project
-                }));
-                
-                toast.success("Proyecto creado", {
-                    description: `${project.name}`,
+    persist((set, get) => ({
+        projects: [],
+        currentProject: null,
+        createProject: async (project) => {
+            const { data, error } = await ProjectService.createProject(project);
+            if (!data) {
+                toast.error("Error al crear el proyecto", {
+                    description: error?.message || "Ocurrió un error desconocido",
                 });
-            },
-            
-            updateProject: (id, updates) => {
-                set((state) => ({
-                    projects: state.projects.map((p) =>
-                        p.id === id
-                            ? { ...p, ...updates, updatedAt: new Date().toISOString() }
-                            : p
-                    ),
-                }));
-                
-                toast.success("Proyecto actualizado");
-            },
-            
-            deleteProject: (id) => {
-                set((state) => ({
-                    projects: state.projects.filter((p) => p.id !== id),
-                    currentProjectId: state.currentProjectId === id ? null : state.currentProjectId,
-                }));
-                
-                toast.success("Proyecto eliminado");
-            },
-            
-            getProjectById: (id) => {
-                return get().projects.find((p) => p.id === id);
-            },
-            
-            setCurrentProject: (id) => {
-                set({ currentProjectId: id });
-            },
-            
-            getCurrentProject: () => {
-                const { projects, currentProjectId } = get();
-                return projects.find((p) => p.id === currentProjectId);
-            },
-        }),
+                return null;
+            }
+            set((state) => ({
+                projects: [data, ...state.projects],
+            }));
+
+            return data;
+        },
+        getProjects: async () => {
+            const { data, error } = await ProjectService.getProjects();
+            if (!data) {
+                toast.error("Error al obtener los proyectos", {
+                    description: error?.message || "Ocurrió un error desconocido",
+                });
+                return;
+            }
+            set({ projects: data });
+        },
+        updateProject: async (id, project) => {
+            const { data, error } = await ProjectService.updateProject(id, project);
+            if (!data) {
+                toast.error("Error al actualizar el proyecto", {
+                    description: error?.message || "Ocurrió un error desconocido",
+                });
+                return null;
+            }
+            set((state) => ({
+                projects: state.projects.map((p) => (p.id === id ? data : p)),
+                currentProject: state.currentProject?.id === id ? data : state.currentProject,
+            }));
+            return data;
+        },
+
+        deleteProject: async (id) => {
+            const { error } = await ProjectService.deleteProject(id);
+            if (error) {
+                toast.error("Error al eliminar el proyecto", {
+                    description: error.message || "Ocurrió un error desconocido",
+                });
+                return;
+            }
+            set((state) => ({
+                projects: state.projects.filter((p) => p.id !== id),
+                currentProject: state.currentProject?.id === id ? null : state.currentProject,
+            }));
+
+            toast.success("Proyecto eliminado");
+        },
+
+        setCurrentProject: (project) => {
+            set({ currentProject: project });
+        }
+    }),
         {
             name: "project-storage",
+            partialize: (state) => ({
+                currentProject: state.currentProject,
+            }),
         }
     )
 );

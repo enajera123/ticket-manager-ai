@@ -1,7 +1,7 @@
 import { toast } from "sonner"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { fetchData } from "@/lib/fetch"
+import { fetchData } from "@/lib/utils/fetch"
 import type { APIResponse } from "@/lib/types"
 import type { User } from "@/model/User"
 

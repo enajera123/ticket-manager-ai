@@ -7,18 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTicketStore } from "@/store/useTicketStore"
-import { useProjectStore } from "@/store/useProjectStore"
+import { useProject } from "@/hooks/stores/useProject"
 
 
 export function TicketPromptForm() {
     const { createTicketFromPrompt, isProcessing } = useTicketStore()
-    const { getCurrentProject } = useProjectStore()
-    const currentProject = getCurrentProject()
+    const { currentProject } = useProject()
     const [prompt, setPrompt] = useState("")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!prompt.trim() || isProcessing || !currentProject) return
+        if (!prompt.trim() || isProcessing || !currentProject?.id) return
 
         const ticket = await createTicketFromPrompt(prompt, currentProject.id, currentProject.context)
         if (ticket) {

@@ -10,7 +10,7 @@ import { ticketInitialValues, TicketSchema } from "@/schemas/TicketSchema"
 import InputField from "@/components/common/InputField"
 import SelectField from "@/components/common/SelectField"
 import { useCrudTickets } from "@/hooks/tickets/useCrudTickets"
-import { useProjectStore } from "@/store/useProjectStore"
+import { useProject } from "@/hooks/stores/useProject"
 
 const ticketTypes: { value: TicketType; label: string }[] = [
     { value: "BUG", label: "Bug" },
@@ -43,14 +43,13 @@ interface TicketEditDialogProps {
 export function TicketEditDialog({ ticket, open, onOpenChange }: TicketEditDialogProps) {
 
     const { handleSave } = useCrudTickets()
-    const { getCurrentProject } = useProjectStore()
-    const currentProject = getCurrentProject()
+    const { currentProject } = useProject()
     const [tagInput, setTagInput] = useState("")
-    
-    const initialValues = ticket 
+
+    const initialValues = ticket
         ? ticketInitialValues(ticket)
         : { ...ticketInitialValues(null), projectId: currentProject?.id || "" }
-    
+
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: initialValues as Ticket,
@@ -64,14 +63,10 @@ export function TicketEditDialog({ ticket, open, onOpenChange }: TicketEditDialo
             open={open}
             onOpenChange={onOpenChange}
             title={ticket?.id ? "Editar ticket" : "Crear ticket"}
-            description={ticket?.id ?? ""}
+            description={ticket?.id ? `Editando: ${ticket.title}` : "Crea un nuevo ticket para tu proyecto"}
             showFooter={true}
             onCancel={() => onOpenChange(false)}
-            onConfirm={() => {
-                console.log(formik.errors)
-                console.log(formik.values)
-                formik.submitForm()
-            }}
+            onConfirm={() => formik.submitForm()}
             cancelText="Cancelar"
             confirmText="Guardar cambios"
             loading={false}

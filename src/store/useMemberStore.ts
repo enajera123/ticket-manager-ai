@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import type { Member } from "@/model/Member";
-import { generateId } from "@/lib/random";
+import { generateId } from "@/lib/utils/random";
 
 interface MemberState {
     members: Member[];

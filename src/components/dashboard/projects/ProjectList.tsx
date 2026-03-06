@@ -4,13 +4,13 @@ import { useState } from "react"
 import { AnimatePresence } from "framer-motion"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useProjectStore } from "@/store/useProjectStore"
 import { ProjectCard } from "./ProjectCard"
 import { ProjectFormDialog } from "./ProjectFormDialog"
 import type { Project } from "@/model/Project"
+import { useProject } from "@/hooks/stores/useProject"
 
 export function ProjectList() {
-    const { projects } = useProjectStore()
+    const { projects } = useProject()
     const [editingProject, setEditingProject] = useState<Project | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -50,7 +50,7 @@ export function ProjectList() {
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <AnimatePresence mode="popLayout">
-                            {projects.map((project) => (
+                            {(projects as Required<Project>[]).map((project) => (
                                 <ProjectCard
                                     key={project.id}
                                     project={project}

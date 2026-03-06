@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { OpenRouterModel } from "@/model/openRouter/Model";
-import { fetchData } from "@/lib/fetch";
+import { fetchData } from "@/lib/utils/fetch";
 const CACHE_KEY = "openrouter-models-cache";
 interface OpenRouterModelState {
     openRouterModels: OpenRouterModel[];

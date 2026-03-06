@@ -5,16 +5,12 @@ export class User {
     email: string;
     name: string;
     isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
     role: UserRole;
-    constructor(id: string, email: string, name: string, isActive: boolean, createdAt: Date, updatedAt: Date) {
+    constructor(id: string, email: string, name: string, isActive: boolean) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.isActive = isActive;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.role = "USER";
     }
 }

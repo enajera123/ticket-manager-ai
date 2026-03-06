@@ -1,18 +1,18 @@
 import type { Ticket } from "@/model/Ticket"
 import { useTicketStore } from "@/store/useTicketStore"
-import { useProjectStore } from "@/store/useProjectStore"
-import { useState } from "react"
+import { use, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { ListTodo, Plus } from "lucide-react"
 import { TicketCard } from "./TicketCard"
 import { TicketEditDialog } from "./TicketEditDialog"
 import { Button } from "@/components/ui/button"
+import { useProject } from "@/hooks/stores/useProject"
 
 export function TicketList() {
     const { getTicketsByProject } = useTicketStore()
-    const { getCurrentProject } = useProjectStore()
-    const currentProject = getCurrentProject()
-    const tickets = currentProject ? getTicketsByProject(currentProject.id) : []
+    const { currentProject } = useProject()
+    const tickets = use(getTicketsByProject(currentProject?.id || -1))
+
     const [editingTicket, setEditingTicket] = useState<Ticket | null>(null)
     const [editDialogOpen, setEditDialogOpen] = useState(false)
 
@@ -20,7 +20,6 @@ export function TicketList() {
         setEditingTicket(ticket)
         setEditDialogOpen(true)
     }
-
     if (!currentProject) {
         return (
             <motion.div
@@ -72,7 +71,7 @@ export function TicketList() {
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <AnimatePresence mode="popLayout">
-                    {tickets.map((ticket) => (
+                    {(tickets as Required<Ticket>[]).map((ticket) => (
                         <TicketCard key={ticket.id} ticket={ticket} onEdit={handleEdit} />
                     ))}
                 </AnimatePresence>
