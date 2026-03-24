@@ -1,17 +1,23 @@
 import type { Ticket } from "@/model/Ticket"
-import { useTicket } from "../stores/useTicket"
+import { useTicketStore } from "@/store/useTicketStore"
 
+/**
+ * Hook for common ticket CRUD operations.
+ * Provides a unified save function that handles both create and update.
+ */
 export function useCrudTickets() {
-    const { createTicket, updateTicket } = useTicket()
-    const handleSave = (ticket: Ticket) => {
-        if (ticket?.id) {
-            const { id, created_at, ...updates } = ticket
-            updateTicket(id, updates)
-        } else {
-            createTicket(ticket)
-        }
+  const createTicket = useTicketStore((s) => s.createTicket)
+  const updateTicket = useTicketStore((s) => s.updateTicket)
+
+  const handleSave = (ticket: Ticket): Promise<Ticket | null> => {
+    if (ticket?.id) {
+      const { id, created_at, ...updates } = ticket
+      return updateTicket(id, updates)
     }
-    return {
-        handleSave,
-    }
+    return createTicket(ticket)
+  }
+
+  return {
+    handleSave,
+  }
 }

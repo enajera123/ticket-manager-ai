@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProject } from "@/hooks/stores/useProject"
-import { useTicket } from "@/hooks/stores/useTicket"
+import { useTicketClassifier } from "@/hooks/ai/useTicketClassifier"
 
 export function TicketPromptForm() {
-    const { createTicketFromPrompt, isProcessing } = useTicket()
+    const { classifyTicket, isProcessing } = useTicketClassifier()
     const { currentProject } = useProject()
     const [prompt, setPrompt] = useState("")
 
@@ -16,7 +16,7 @@ export function TicketPromptForm() {
         e.preventDefault()
         if (!prompt.trim() || isProcessing || !currentProject?.id) return
 
-        const ticket = await createTicketFromPrompt(prompt, currentProject.id, currentProject.context)
+        const ticket = await classifyTicket(prompt, currentProject.id, currentProject.context)
         if (ticket) {
             setPrompt("")
         }

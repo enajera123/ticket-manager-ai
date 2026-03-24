@@ -2,15 +2,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, Zap, TrendingUp, Hash } from "lucide-react"
 import { formatCost, formatTokens } from "@/lib/utils/parse"
 import { useTicket } from "@/hooks/stores/useTicket"
+import { useGenerationCost } from "@/hooks/stores/useGenerationCost"
 
 
 export function BillingStats() {
-    const { generationCosts, tickets } = useTicket()
-
+    const { tickets } = useTicket()
+    const { generationCosts } = useGenerationCost()
     const totalCost = generationCosts.reduce((sum, c) => sum + c.totalCost, 0)
-    const totalTokens = generationCosts.reduce((sum, c) => sum + c.usage.totalTokens, 0)
-    const totalPromptTokens = generationCosts.reduce((sum, c) => sum + c.usage.promptTokens, 0)
-    const totalCompletionTokens = generationCosts.reduce((sum, c) => sum + c.usage.completionTokens, 0)
+    const totalTokens = generationCosts.reduce((sum, c) => sum + c.totalTokens, 0)
+    const totalPromptTokens = generationCosts.reduce((sum, c) => sum + c.promptTokens, 0)
+    const totalCompletionTokens = generationCosts.reduce((sum, c) => sum + c.completionTokens, 0)
     const totalGenerations = generationCosts.length
     const avgCostPerTicket = totalGenerations > 0 ? totalCost / totalGenerations : 0
 

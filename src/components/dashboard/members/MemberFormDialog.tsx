@@ -2,7 +2,7 @@ import { Formik, Form } from "formik"
 import * as Yup from "yup"
 import { AppDialog } from "@/components/common/AppDialog"
 import InputField from "@/components/common/InputField"
-import { useMemberStore } from "@/store/useMemberStore"
+import { useMember } from "@/hooks/stores/useMember"
 import type { Member, MemberRole } from "@/model/Member"
 import { Mail, User, Shield } from "lucide-react"
 
@@ -27,7 +27,7 @@ interface MemberFormDialogProps {
 }
 
 export function MemberFormDialog({ open, onOpenChange, projectId, member }: MemberFormDialogProps) {
-    const { createMember, updateMember } = useMemberStore()
+    const { createMember, updateMember } = useMember()
     const isEdit = !!member
 
     return (

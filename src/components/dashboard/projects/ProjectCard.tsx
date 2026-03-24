@@ -2,7 +2,7 @@ import { motion } from "framer-motion"
 import { Pencil, Trash2, Users, ListTodo } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useMemberStore } from "@/store/useMemberStore"
+import { useMember } from "@/hooks/stores/useMember"
 import type { Project } from "@/model/Project"
 import { useProject } from "@/hooks/stores/useProject"
 import { showConfirmationAlert } from "@/lib/utils/alert"
@@ -16,7 +16,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, onEdit }: ProjectCardProps) {
     const { deleteProject, setCurrentProject, currentProject } = useProject()
     const { tickets } = useTicket()
-    const { members } = useMemberStore()
+    const { members } = useMember()
 
     const projectTickets = tickets.filter((t) => t.projectId === project.id)
     const projectMembers = members.filter((m) => m.projectId === project.id)

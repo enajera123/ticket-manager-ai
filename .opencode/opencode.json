@@ -1,0 +1,92 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "assistant": {
+      "mode": "primary",
+      "description": "Orchestrator agent. Breaks down tasks and delegates them. Never writes code or edits files.",
+      "file": "agents/assistant.md",
+      "reasoningEffort": "high",
+      "permission": {
+        "task": {
+          "*": "deny",
+          "architect": "allow",
+          "bug-fixer": "allow",
+          "docs-writer": "allow"
+        },
+        "filesystem": "deny",
+        "edit": "deny",
+        "write": "deny"
+      }
+    },
+    "architect": {
+      "mode": "subagent",
+      "description": "Designs system architecture, plans tasks, and decides implementation strategy. Does not write code.",
+      "file": "agents/architect.md",
+      "permission": {
+        "task": {
+          "*": "deny",
+          "implementor": "allow",
+          "docs-writer": "allow"
+        },
+        "filesystem": "deny",
+        "edit": "deny"
+      }
+    },
+    "implementor": {
+      "mode": "subagent",
+      "description": "Executes implementation tasks, modifies files, performs migrations, and writes code.",
+      "file": "agents/implementor.md",
+      "permission": {
+        "task": {
+          "frontend-developer": "allow",
+          "backend-developer": "allow",
+          "bug-fixer": "allow",
+          "docs-writer": "allow"
+        },
+        "filesystem": "allow",
+        "edit": "allow",
+        "write": "allow"
+      }
+    },
+    "bug-fixer": {
+      "mode": "subagent",
+      "description": "Specialized in debugging, fixing errors, and improving code reliability.",
+      "file": "agents/bug-fixer.md",
+      "permission": {
+        "filesystem": "allow",
+        "edit": "allow",
+        "write": "allow"
+      }
+    },
+    "frontend-developer": {
+      "mode": "subagent",
+      "description": "Handles UI implementation using React, Tailwind, and frontend best practices.",
+      "file": "agents/frontend-developer.md",
+      "permission": {
+        "filesystem": "allow",
+        "edit": "allow",
+        "write": "allow"
+      }
+    },
+    "backend-developer": {
+      "mode": "subagent",
+      "description": "Handles backend development, APIs, databases, authentication, and server-side logic.",
+      "file": "agents/backend-developer.md",
+      "permission": {
+        "filesystem": "allow",
+        "edit": "allow",
+        "write": "allow"
+      }
+    },
+    "docs-writer": {
+      "mode": "subagent",
+      "description": "Responsible for writing and maintaining documentation, including README files, API docs, and usage guides.",
+      "file": "agents/docs-writer.md",
+      "permission": {
+        "filesystem": "allow",
+        "edit": "allow",
+        "write": "allow"
+      }
+    }
+  }
+}

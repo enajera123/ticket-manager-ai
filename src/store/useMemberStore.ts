@@ -10,7 +10,7 @@ interface MemberState {
     updateMember: (id: string, updates: Partial<Omit<Member, "id" | "projectId" | "addedAt">>) => void;
     deleteMember: (id: string) => void;
     getMemberById: (id: string) => Member | undefined;
-    getMembersByProject: (projectId: string) => Member[];
+    getMembersByProject: (projectId: number) => Member[];
 }
 
 export const useMemberStore = create<MemberState>()(
@@ -56,7 +56,7 @@ export const useMemberStore = create<MemberState>()(
                 return get().members.find((m) => m.id === id);
             },
             
-            getMembersByProject: (projectId) => {
+            getMembersByProject: (projectId: number) => {
                 return get().members.filter((m) => m.projectId === projectId);
             },
         }),

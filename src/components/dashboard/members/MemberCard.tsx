@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useMemberStore } from "@/store/useMemberStore"
+import { useMember } from "@/hooks/stores/useMember"
 import type { Member, MemberRole } from "@/model/Member"
 import { Pencil, Trash2, Mail } from "lucide-react"
 import swal from "sweetalert2"
@@ -20,7 +20,7 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, onEdit }: MemberCardProps) {
-    const { deleteMember } = useMemberStore()
+    const { deleteMember } = useMember()
     const roleConfig = ROLE_CONFIG[member.role]
 
     const getInitials = (name: string) => {

@@ -1,23 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCost, formatTokens } from '@/lib/utils/parse';
-import { useGenerationCostStore } from '@/store/useGenerationCostStore';
+import { useGenerationCost } from '@/hooks/stores/useGenerationCost';
 import { BarChart3, Cpu } from 'lucide-react';
-import { use } from 'react';
+import { useEffect, useState } from 'react';
 export function BillingByModel() {
-    const { getCostByModel } = useGenerationCostStore()
-    const generationCosts = use(getCostByModel())
+    const { getCostByModel } = useGenerationCost()
+    const [generationCosts, setGenerationCosts] = useState<Record<string, { cost: number; count: number; tokens: number }>>({})
+    useEffect(() => {
+        getCostByModel().then(setGenerationCosts)
+    }, [getCostByModel])
 
-    const modelMap: Record<string, { cost: number; count: number; tokens: number }> = {}
-    for (const c of generationCosts) {
-        if (!modelMap[c.model]) {
-            modelMap[c.model] = { cost: 0, count: 0, tokens: 0 }
-        }
-        modelMap[c.model].cost += c.totalCost
-        modelMap[c.model].count += 1
-        modelMap[c.model].tokens += c.totalTokens
-    }
-
-    const models = Object.entries(modelMap).sort((a, b) => b[1].cost - a[1].cost)
+    const models = Object.entries(generationCosts || {}).sort((a, b) => b[1].cost - a[1].cost)
 
     if (models.length === 0) {
         return (

@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useMemberStore } from "@/store/useMemberStore"
+import { useMember } from "@/hooks/stores/useMember"
 import { MemberCard } from "./MemberCard"
 import { MemberFormDialog } from "./MemberFormDialog"
 import type { Member } from "@/model/Member"
 import { useProject } from "@/hooks/stores/useProject"
 
 export function MemberList() {
-    const { members } = useMemberStore()
+    const { members } = useMember()
     const { currentProject } = useProject()
     const [editingMember, setEditingMember] = useState<Member | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)

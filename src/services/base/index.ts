@@ -1,0 +1,1 @@
+export { BaseService, type ServiceResponse, type DeleteResponse } from "./BaseService"

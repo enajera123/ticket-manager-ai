@@ -11,7 +11,7 @@ import InputField from "../common/InputField"
 
 export function LoginForm() {
     const [isLoading, setIsLoading] = useState(false)
-    const [showPassword, setShowPassword] = useState(false)
+    const [showPassword] = useState(false)
     const navigate = useNavigate()
 
     const { login } = useAuthStore()
